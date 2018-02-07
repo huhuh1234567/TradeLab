@@ -1,5 +1,122 @@
 (function(){
 
+	function merge(base,other){
+		for(p in other){
+			var v = other[p];
+			if(v!==undefined){
+				base[p] = v;
+			}
+			else{
+				delete base[p];
+			}
+		}
+		return base;
+	}
+
+	function inherit(constructor,base){
+		var prototype = Object.create(base.prototype);
+		prototype.constructor = constructor;
+		constructor.prototype = prototype;
+	}
+
+	function Iterator(next){
+		this.next = next;
+	}
+
+	merge(Iterator.prototype,{
+		foreach: function(block){
+			var end = false;
+			var v = undefined;
+			while(!end&&v===undefined){
+				var last = this.next();
+				if(last!==undefined){
+					v = block(last,this);
+				}
+				else{
+					end = true;
+				}
+			}
+			return v;
+		},
+		map: function(func){
+			var self = this;
+			var end = false;
+			return new Iterator(function(){
+				if(end){
+					return undefined;
+				}
+				else{
+					var v = undefined;
+					var last = self.next();
+					if(last!==undefined){
+						v = func(last);
+					}
+					else{
+						end = true;
+					}
+					return v;
+				}
+			});
+		},
+		filter: function(pred){
+			var self = this;
+			var end = false;
+			return new Iterator(function(){
+				if(end){
+					return undefined;
+				}
+				else{
+					var v = undefined;
+					while(!end&&v===undefined){
+						var last = self.next();
+						if(last!==undefined){
+							v = pred(last)?last:undefined;
+						}
+						else{
+							end = true;
+						}
+					}
+					return v;
+				}
+			});
+		},
+		flatMap: function(func){
+			var self = this;
+			var end = false;
+			var buffer = undefined;
+			return new Iterator(function(){
+				if(end){
+					return undefined;
+				}
+				else{
+					var v = undefined;
+					while(!end&&v===undefined){
+						while(!end&&buffer===undefined){
+							var last = self.next();
+							if(last!==undefined){
+								buffer = func(last);
+							}
+							else{
+								end = true;
+							}
+						}
+						if(buffer!==undefined){
+							v = buffer.next();
+						}
+					}
+					return v;
+				}
+			});
+		}
+	});
+
+	function RemovableIterator(next,remove){
+		Iterator.call(this,next)
+		this.remove = remove;
+	};
+
+	inherit(RemovableIterator,Iterator);
+
 	function ListNode(value){
 		this._ = value;
 		this.next$ = null;
@@ -25,13 +142,12 @@
 	};
 
 	List.isBefore$ = function(l$,r$){
-		for(; r$&&r$!==l$; r$ = r$.next$){
+		for(; r$!==null&&r$!==l$; r$=r$.next$){
 		}
 		return r$===null;
 	};
 
-	List.prototype = {
-		constructor: List,
+	merge(List.prototype,{
 		insert$: function(target$,next$){
 			var previous$ = next$!==null?next$.previous$:this.tail$;
 			target$.next$ = next$;
@@ -89,30 +205,52 @@
 			var list = this;
 			var end = false;
 			var last$ = null;
-			return {
-				remove: function(){
-					if(last$!=null){
-						var next$ = list.remove$(last$);
-						last$ = next$===null?list.tail$:next$.previous$;
-					}
-				},
-				next: function(){
-					if(!end){
-						var v = undefined;
-						last$ = last$===null?list.head$:last$.next$;
-						if(last$!==null){
-							v = last$._;
-						}
-						else{
-							end = true;
-						}
-						return v;
+			return new RemovableIterator(function(){
+				if(!end){
+					var v = undefined;
+					last$ = last$===null?list.head$:last$.next$;
+					if(last$!==null){
+						v = last$._;
 					}
 					else{
-						return undefined;
+						end = true;
 					}
+					return v;
 				}
-			}
+				else{
+					return undefined;
+				}
+			},function(){
+				if(last$!=null){
+					var next$ = list.remove$(last$);
+					last$ = next$===null?list.tail$:next$.previous$;
+				}
+			});
+		},
+		_r_: function(){
+			var list = this;
+			var end = false;
+			var last$ = null;
+			return new RemovableIterator(function(){
+				if(!end){
+					var v = undefined;
+					last$ = last$===null?list.tail$:last$.previous$;
+					if(last$!==null){
+						v = last$._;
+					}
+					else{
+						end = true;
+					}
+					return v;
+				}
+				else{
+					return undefined;
+				}
+			},function(){
+				if(last$!=null){
+					last$ = list.remove$(last$);
+				}
+			});
 		},
 		__: function(){
 			var rst = new Array(this.length);
@@ -151,145 +289,96 @@
 				this.unshift(current$._);
 			}
 		}
-	};
-
-	function foreach_(itor,block){
-		var end = false;
-		var v = undefined;
-		while(!end&&v===undefined){
-			var last = itor.next();
-			if(last!==undefined){
-				v = block(last);
-			}
-			else{
-				end = true;
-			}
-		}
-		return v;
-	}
-
-	function map_(itor,func){
-		return {
-			next: function(){
-				var last = itor.next();
-				return last!==undefined?func(last):undefined;
-			}
-		}
-	}
-
-	function filter_(itor,pred){
-		var end = false;
-		return {
-			next: function(){
-				if(end){
-					return undefined;
-				}
-				else{
-					var v = undefined;
-					while(!end&&v===undefined){
-						var last = itor.next();
-						if(last!==undefined){
-							v = pred(last)?last:undefined;
-						}
-						else{
-							end = true;
-						}
-					}
-					return v;
-				}
-			}
-		}
-	}
-
-	function flatMap_(itor,func){
-		var end = false;
-		var buffer = undefined;
-		return {
-			next: function(){
-				if(end){
-					return undefined;
-				}
-				else{
-					var v = undefined;
-					while(!end&&v===undefined){
-						while(!end&&buffer===undefined){
-							var last = itor.next();
-							if(last!==undefined){
-								buffer = func(last);
-							}
-							else{
-								end = true;
-							}
-						}
-						if(buffer!==undefined){
-							v = buffer.next();
-						}
-					}
-					return v;
-				}
-			}
-		}
-	}
+	});
 
 	function count_(total){
 		var count = 0;
-		return {
-			next: function(){
-				if(count<total){
-					var v = count;
-					count++;
-					return v;
-				}
-				else{
-					return undefined;
-				}
+		return new Iterator(function(){
+			if(count<total){
+				var v = count;
+				count++;
+				return v;
 			}
-		}
+			else{
+				return undefined;
+			}
+		});
 	}
 
-	function array_(arr,offset,length){
-		if(offset===undefined){
-			offset = 0;
-		}
-		if(length===undefined){
-			length = arr.length-offset;
-		}
-		var i = offset;
-		return {
-			next: function(){
-				if(i<length){
-					var v = arr[i];
-					i++;
-					return v;
-				}
-				else{
-					return undefined;
-				}
+	function count_r_(total){
+		var count = total;
+		return new Iterator(function(){
+			if(count>0){
+				count--;
+				return count;
 			}
-		}
+			else{
+				return undefined;
+			}
+		});
+	}
+
+	function array_(arr){
+		var i = 0;
+		var length = arr.length;
+		return new Iterator(function(){
+			if(i<length){
+				var v = arr[i];
+				i++;
+				return v;
+			}
+			else{
+				return undefined;
+			}
+		});
+	}
+
+	function array_r_(arr){
+		var i = arr.length;
+		return new Iterator(function(){
+			if(i>0){
+				i--;
+				return arr[i];
+			}
+			else{
+				return undefined;
+			}
+		});
+	}
+
+	function object_(obj){
+		var keys = Object.keys(obj);
+		return array_(keys).map(function(k){
+			return {
+				$: k,
+				_: obj[k]
+			};
+		});
 	}
 
 	function nil_(){
-		return {
-			next: function(){
-				return undefined;
-			}
-		}
+		return new Iterator(function(){
+			return undefined;
+		});
 	}
 
 	function once_(func){
 		var end = false;
-		return {
-			next: function(){
-				if(!end){
-					end = true;
-					return func();
-				}
-				else{
-					return undefined;
-				}
+		return new Iterator(function(){
+			if(!end){
+				end = true;
+				return func();
 			}
-		};
+			else{
+				return undefined;
+			}
+		});
+	}
+
+	function concat_(){
+		return count_(arguments.length).flatMap(function(i){
+			return arguments[i];
+		});
 	}
 
 })();
