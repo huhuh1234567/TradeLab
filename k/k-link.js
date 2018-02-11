@@ -11,9 +11,10 @@
 		this.next$ = null;
 	}
 
-	function Link(){
-		this.length = 0;
+	function Link(eq){
+		this.size = 0;
 		this.___head$ = null;
+		this.___eq = eq;
 	}
 
 	Link.$$ = function(arr){
@@ -24,29 +25,49 @@
 		return rst;
 	};
 
-	merge(Link.prototype,{
-		peek: function(){
-			return this.___head$===null?undefined:___head$._;
-		},
-		offer: function(value){
-			var $ = new LinkNode(value);
-			$.next$ = this.___head$;
-			this.___head$ = $;
-			this.length++;
-		},
-		poll: function(){
-			if(this.___head$===null){
-				return undefined;
+	function Link_remove$(link,previous$,$){
+		if($!==null){
+			if(previous$===null){
+				link.___head$ = $.next$;
 			}
 			else{
-				var $ = this.___head$;
-				this.___head$ = $.next$;
-				this.length--;
-				return $._;
+				previous$.next$ = $.next$;
 			}
+			link.size--;
+		}
+		return $;
+	}
+
+	function Link_insert$(link,previous$,$){
+		if(previous$===null){
+			$.next$ = link.___head$;
+			link.___head$ = $;
+		}
+		else{
+			$.next$ = previous$.next$;
+			previous$.next$ = $;
+		}
+		link.size++;
+		return $;
+	}
+
+	merge(Link.prototype,{
+		head: function(){
+			return this.size===0?undefined:this.___head$._;
+		},
+		offer: function(value){
+			Link_insert$(this,null,new LinkNode(value));
+		},
+		poll: function(){
+			var v = undefined;
+			if(this.size>0){
+				v = this.___head$._;
+				Link_remove$(this,null,this.___head$);
+			}
+			return v;
 		},
 		_: function(){
-			var list = this;
+			var link = this;
 			var end = false;
 			var last$ = null;
 			var previous$ = null;
@@ -54,7 +75,7 @@
 				next: function(){
 					if(!end){
 						var v = undefined;
-						var next$ = last$===null?list.___head$:last$.next$;
+						var next$ = last$===null?link.___head$:last$.next$;
 						if(next$!==null){
 							v = next$._;
 							if(previous$!==last$){
@@ -71,28 +92,87 @@
 						return undefined;
 					}
 				},
+				replace: function(value){
+					if(last$!==null){
+						last$._ = value;
+					}
+				},
 				remove: function(){
+					var v = undefined;
 					if(previous$!==last$){
-						if(previous$===null){
-							list.___head$ = last$.next$;
-						}
-						else{
-							previous$.next$ = last$.next$;
+						v = last$._;
+						if(Link_remove$(link,previous$,last$).next$===null){
+							end = true;
 						}
 						last$ = previous$;
-						list.length--;
 					}
+					return v;
+				},
+				insert_before: function(value){
+					var $ = Link_insert$(link,previous$,new LinkNode(value));
+					if(last$===previous$){
+						last$ = $;
+					}
+					previous$ = $;
+				},
+				insert_after: function(value){
+					var $ = Link_insert$(link,last$,new LinkNode(value));
+					if(last$===previous$){
+						previous$ = $;
+					}
+					else{
+						previous$ = last$;
+					}
+					last$ = $;
 				}
 			});
 		},
 		__: function(){
-			var rst = new Array(this.length);
+			var rst = new Array(this.size);
 			var current$ = this.head$;
-			for(var i=0; i<this.length; i++){
+			for(var i=0; i<this.size; i++){
 				rst[i] = current$._;
 				current$=current$.next$
 			}
 			return rst;
+		},
+		find_: function(target,block){
+			var rv = undefined;
+			var rit = undefined;
+			var found = this._().foreach(function(v,it){
+				if(this.___eq!==undefined){
+					if(this.___eq(v,target)){
+						return block(v,it);
+					}
+				}
+				else{
+					if(v===target){
+						return block(v,it);
+					}
+				}
+			});
+		},
+		find: function(target){
+			return this.find_(target,function(v){
+				return v;
+			});
+		},
+		remove: function(target){
+			return this.find_(target,function(v,it){
+				return it.remove();
+			});
+		},
+		insert_before: function(target,value){
+			this.find_(target,function(v,it){
+				it.insert_before(value);
+				return true;
+			});
+		},
+		insert_after: function(target,value){
+			this.find_(target,function(v,it){
+				it.insert_after(value);
+				return true;
+			});
 		}
 	});
 

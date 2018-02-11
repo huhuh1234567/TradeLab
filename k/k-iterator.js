@@ -22,7 +22,7 @@
 			}
 			return v;
 		},
-		map: function(func){
+		map_: function(func){
 			var src = this;
 			var end = false;
 			return merge(new Iterator(),{
@@ -44,7 +44,7 @@
 				}
 			});
 		},
-		filter: function(pred){
+		filter_: function(pred){
 			var src = this;
 			var end = false;
 			return merge(new Iterator(),{
@@ -68,7 +68,7 @@
 				}
 			});
 		},
-		flatMap: function(func){
+		flatMap_: function(func){
 			var src = this;
 			var end = false;
 			var buffer = undefined;
@@ -164,7 +164,7 @@
 	}
 
 	function object_(obj){
-		return array_(Object.keys(obj)).map(function(k){
+		return array_(Object.keys(obj)).map_(function(k){
 			return [k,obj[k]];
 		});
 	}
@@ -193,7 +193,7 @@
 	}
 
 	function union_(){
-		return count_(arguments.length).flatMap(function(i){
+		return count_(arguments.length).flatMap_(function(i){
 			return arguments[i];
 		});
 	}
