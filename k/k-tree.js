@@ -6,12 +6,9 @@
 	var K_ITERATOR = require("./k-iterator");
 	var Iterator = K_ITERATOR.Iterator;
 
-	var RED = false;
-	var BLACK = true;
-
 	function TreeNode(value){
 		this._ = value;
-		this.height = 0;
+		this.height = 1;
 		this.parent$ = null;
 		this.left$ = null;
 		this.right$ = null;
@@ -22,12 +19,6 @@
 			var lh = this.left$===null?0:this.left$.height;
 			var rh = this.right$===null?0:this.right$.height;
 			return this.height = lh<rh?rh:lh;
-		},
-		left$height: function(){
-			return this.left$===null?0:this.left$.height;
-		},
-		right$height: function(){
-			return this.right$===null?0:this.right$.height;
 		}
 	});
 
@@ -196,8 +187,8 @@
 
 	function Tree_fix_left(tree,$){
 		var right$ = $.right$;
-		var lh = right$.left$height();
-		var rh = right$.right$height();
+		var lh = right$.left$===null?0:right$.left$.height;
+		var lh = right$.right$===null?0:right$.right$.height;
 		if(lh>rh){
 			right$ = Tree_rotate_right(tree,right$);
 			right$.right$.update();
@@ -211,8 +202,8 @@
 
 	function Tree_fix_right(tree,$){
 		var left$ = $.left$;
-		var lh = left$.left$height();
-		var rh = left$.right$height();
+		var lh = left$.left$===null?0:left$.left$.height;
+		var rh = left$.right$===null?0:left$.right$.height;
 		if(lh<rh){
 			left$ = Tree_rotate_left(tree,left$);
 			left$.left$.update();
@@ -226,9 +217,9 @@
 
 	function Tree_rebalance(tree,$){
 		while($!==null){
-			var lh = $.left$height();
-			var rh = $.right$height();
-			var h = lr<rh?rh:lh
+			var lh = $.left$===null?0:$.left$.height;
+			var rh = $.right$===null?0:$.right$.height;
+			var h = lr<rh?rh:lh;
 			var d = lr-rh;
 			//check if fix over
 			if($.height===h&&d>=-1&&d<=1){
@@ -252,9 +243,9 @@
 		var parent$ = $.parent$;
 		while(parent$!==null){
 			$ = parent$;
-			var lh = $.left$height();
-			var rh = $.right$height();
-			var h = lr<rh?rh:lh
+			var lh = $.left$===null?0:$.left$.height;
+			var rh = $.right$===null?0:$.right$.height;
+			var h = lr<rh?rh:lh;
 			//check if fix over
 			if($.height===h){
 				break;
