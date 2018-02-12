@@ -14,7 +14,9 @@
 	function Link(eq){
 		this.size = 0;
 		this.___head$ = null;
-		this.___eq = eq;
+		if(eq!==undefined){
+			this.___eq = eq;
+		}
 	}
 
 	Link.$$ = function(arr){
@@ -52,6 +54,9 @@
 	}
 
 	merge(Link.prototype,{
+		___eq: function(l,r){
+			return l===r;
+		},
 		head: function(){
 			return this.size===0?undefined:this.___head$._;
 		},
@@ -137,18 +142,9 @@
 			return rst;
 		},
 		find_: function(target,block){
-			var rv = undefined;
-			var rit = undefined;
 			var found = this._().foreach(function(v,it){
-				if(this.___eq!==undefined){
-					if(this.___eq(v,target)){
-						return block(v,it);
-					}
-				}
-				else{
-					if(v===target){
-						return block(v,it);
-					}
+				if(this.___eq(v,target)){
+					return block(v,it);
 				}
 			});
 		},
