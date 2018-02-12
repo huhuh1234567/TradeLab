@@ -27,8 +27,7 @@
 		});
 
 		if(!seed||seed.length===0){
-			var s = long2ints(new Date().getTime());
-			seed = [s>>>32,s&0x00ffffffff];
+			seed = long2ints(new Date().getTime());
 		}
 
 		var slen = seed.length;
