@@ -13,6 +13,45 @@
 		this.right$ = null;
 	}
 
+	merge(TreeNode.prototype,{
+		next$: function(){
+			var $ = this;
+			if($.right$!==null){
+				$ = $.right$;
+				while($.left$!=null){
+					$ = $.left$;
+				}
+			}
+			else{
+				var child$ = $;
+				$ = $.parent$;
+				while($!==null&&child$===$.right$){
+					child$ = $;
+					$ = $.parent$;
+				}
+			}
+			return $;
+		},
+		previous$: function(){
+			var $ = this;
+			if($.left$!==null){
+				$ = $.left$;
+				while($.right$!=null){
+					$ = $.right$;
+				}
+			}
+			else{
+				var child$ = $;
+				$ = $.parent$;
+				while($!==null&&child$===$.left$){
+					child$ = $;
+					$ = $.parent$;
+				}
+			}
+			return $;
+		}
+	});
+
 	function Tree(comp){
 		this.size = 0;
 		this.___root$ = null;
@@ -21,104 +60,68 @@
 		}
 	}
 
-	function Tree_first$(tree){
-		var $ = tree.___root$;
-		if($!==null){
-			while($.left$!==null){
-				$ = $.left$;
-			}
-		}
-		return $;
-	}
-
-	function Tree_last$(tree){
-		var $ = tree.___root$;
-		if($!==null){
-			while($.right$!==null){
-				$ = $.right$;
-			}
-		}
-		return $;
-	}
-
-	function Tree_next$(tree,$){
-		if($.right$!==null){
-			$ = $.right$;
-			while($.left$!=null){
-				$ = $.left$;
-			}
-		}
-		else{
-			var child$ = $;
-			$ = $.parent$;
-			while($!==null&&child$===$.right$){
-				child$ = $;
-				$ = $.parent$;
-			}
-		}
-		return $;
-	}
-
-	function Tree_previous$(tree,$){
-		if($.left$!==null){
-			$ = $.left$;
-			while($.right$!=null){
-				$ = $.right$;
-			}
-		}
-		else{
-			var child$ = $;
-			$ = $.parent$;
-			while($!==null&&child$===$.left$){
-				child$ = $;
-				$ = $.parent$;
-			}
-		}
-		return $;
-	}
-
 	function Tree_find$(tree,value,block){
-		var $ = tree.___root$;
-		if($===null){
-			//root node
-			return block(null,null,tree.___comp(value,value));
-		}
-		else{
-			var parent$ = null;
-			var diff = 0;
-			while($!=null){
-				diff = tree.___comp(value,$._);
-				if(diff===0){
-					//found
-					break;
-				}
-				else{
-					parent$ = $;
-					if(diff<0){
-						$ = $.left$;
-					}
-					else{
-						$ = $.right$;
-					}
-				}
-			}
-			//closest node
-			return block(parent$,$,diff)
-		}
 	}
 
 	merge(Tree.prototype,{
 		___comp: function(l,r){
 			return l===r?0:l<r?-1:1;
 		},
-		find: function(target,block){
-			return Tree_find$(this,target,function(parent$,$,diff){
+		___first$: function(){
+			var $ = this.___root$;
+			if($!==null){
+				while($.left$!==null){
+					$ = $.left$;
+				}
+			}
+			return $;
+		},
+		___last$: function(){
+			var $ = this.___root$;
+			if($!==null){
+				while($.right$!==null){
+					$ = $.right$;
+				}
+			}
+			return $;
+		},
+		___find$: function(target,block){
+			var $ = this.___root$;
+			if($===null){
+				//root node
+				return block(null,null,this.___comp(target,target));
+			}
+			else{
+				var parent$ = null;
+				var diff = 0;
+				while($!=null){
+					diff = this.___comp(target,$._);
+					if(diff===0){
+						//found
+						break;
+					}
+					else{
+						parent$ = $;
+						if(diff<0){
+							$ = $.left$;
+						}
+						else{
+							$ = $.right$;
+						}
+					}
+				}
+				//closest node
+				return block(parent$,$,diff)
+			}
+		},
+		find: function(target){
+			return this.___find$(target,function(parent$,$,diff){
 				return $===null?undefined:$._;
 			});
 		},
 		put: function(value){
 			var tree = this;
-			Tree_find$(tree,value,function(parent$,$,diff){
+			this.___find$(value,function(parent$,$,diff){
 				if($!==null){
 					//old node
 					$._ = value;
@@ -130,24 +133,23 @@
 		},
 		remove: function(target){
 			var tree = this;
-			this.size--;
-			return Tree_find$(tree,target,function(parent$,$,diff){
+			this.___find$(target,function(parent$,$,diff){
 				if($===null){
 					return undefined;
 				}
 				else{
 					var v = $._;
-					tree.___remove$(tree,$);
+					tree.___remove$($);
 					return v;
 				}
 			});
 		},
 		first: function(){
-			var $ = Tree_first$(tree);
+			var $ = this.___first$();
 			return $===null?undefined:$._;
 		},
 		last: function(){
-			var $ = Tree_last$(tree);
+			var $ = this.___last$();
 			return $===null?undefined:$._;
 		},
 		_: function(){
@@ -159,7 +161,7 @@
 				next: function(){
 					if(!end){
 						var v = undefined;
-						var next$ = last$===null?Tree_first$(tree):Tree_next$(tree,last$);
+						var next$ = last$===null?tree.___first$():last$.next$();
 						if(next$!==null){
 							v = next$._;
 							if(previous$!==last$){
@@ -185,7 +187,7 @@
 					var v = undefined;
 					if(previous$!==last$){
 						v = last$._;
-						tree.___remove$(tree,last$);
+						tree.___remove$(last$);
 						last$ = previous$;
 					}
 					return v;
@@ -201,7 +203,7 @@
 				next: function(){
 					if(!end){
 						var v = undefined;
-						var previous$ = last$===null?Tree_last$(tree):Tree_previous$(tree,last$);
+						var previous$ = last$===null?tree.___last$():last$.previous$();
 						if(previous$!==null){
 							v = previous$._;
 							if(next$!==last$){
@@ -227,7 +229,7 @@
 					var v = undefined;
 					if(next$!==last$){
 						v = last$._;
-						tree.___remove$(tree,last$);
+						tree.___remove$(last$);
 						last$ = next$;
 					}
 					return v;
@@ -237,5 +239,6 @@
 	});
 
 	exports.Tree = Tree;
+	exports.___TreeNode = TreeNode;
 
 })();

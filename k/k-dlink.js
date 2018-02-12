@@ -21,10 +21,6 @@
 		}
 	}
 
-	DLink.$ = function(value){
-		return new DLinkNode(value);
-	};
-
 	DLink.$$ = function(arr){
 		var rst = new DLink();
 		for(var i=0; i<arr.length; i++){
@@ -154,14 +150,14 @@
 					return v;
 				},
 				insert_before: function(value){
-					var $ = DLink_insert$after(dlink,previous$,new LinkNode(value));
+					var $ = DLink_insert$after(dlink,previous$,new DLinkNode(value));
 					if(last$===previous$){
 						last$ = $;
 					}
 					previous$ = $;
 				},
 				insert_after: function(value){
-					var $ = DLink_insert$after(dlink,last$,new LinkNode(value));
+					var $ = DLink_insert$after(dlink,last$,new DLinkNode(value));
 					if(last$===previous$){
 						previous$ = $;
 					}
@@ -215,7 +211,7 @@
 					return v;
 				},
 				insert_before: function(value){
-					var $ = DLink_insert$before(dlink,last$,new LinkNode(value));
+					var $ = DLink_insert$before(dlink,last$,new DLinkNode(value));
 					if(last$===next$){
 						next$ = $;
 					}
@@ -225,7 +221,7 @@
 					last$ = $;
 				},
 				insert_after: function(value){
-					var $ = DLink_insert$before(dlink,next$,new LinkNode(value));
+					var $ = DLink_insert$before(dlink,next$,new DLinkNode(value));
 					if(last$===next$){
 						last$ = $;
 					}
@@ -321,5 +317,6 @@
 	});
 
 	exports.DLink = DLink;
+	exports.___DLinkNode = DLinkNode;
 
 })();

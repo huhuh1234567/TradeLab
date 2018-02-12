@@ -173,5 +173,6 @@
 	});
 
 	exports.Link = Link;
+	exports.___LinkNode = LinkNode;
 
 })();
