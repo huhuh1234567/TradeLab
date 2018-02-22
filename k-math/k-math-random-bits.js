@@ -4,7 +4,7 @@
 	var merge = K.merge;
 
 	function BitsRandom(){
-		this.___nextGaussian = NaN;
+		this.___nextGaussian = Number.NaN;
 	}
 
 	merge(BitsRandom.prototype,{
@@ -35,7 +35,7 @@
 			} else {
 				// use the second element of the pair already generated
 				random = this.___nextGaussian;
-				this.___nextGaussian = NaN;
+				this.___nextGaussian = Number.NaN;
 			}
 
 			return random;

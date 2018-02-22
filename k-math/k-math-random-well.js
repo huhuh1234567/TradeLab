@@ -1,7 +1,7 @@
 (function(){
 
 	var K_MATH = require("./k-math");
-	var long2ints = K_MATH.long2ints;
+	var long = K_MATH.long;
 
 	var K_ITERATOR = require("../k/k-iterator");
 	var count_ = K_ITERATOR.count_;
@@ -27,7 +27,7 @@
 		});
 
 		if(!seed||seed.length===0){
-			seed = long2ints(new Date().getTime());
+			seed = long(new Date().getTime());
 		}
 
 		var slen = seed.length;
