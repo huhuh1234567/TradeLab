@@ -29,51 +29,50 @@
 
 	function bits(num){
 		var buf = new ArrayBuffer(8);
-		var v1 = new Float64Array(buf);
-		var v2 = new Int32Array(buf);
-		v1[0] = num;
-		return new Long(v2[0],v2[1]);
+		var view = new DataView(buf);
+		view.setFloat64(0,num,true);
+		return new Long(view.getInt32(0,true),view.getInt32(4,true));
 	}
 
 	var POSITIVE_ZERO_BITS = bits(+0.0);
 	var NEGATIVE_ZERO_BITS = bits(-0.0);
 
-	function ulps(bits1,bits2){
+	function ulp(bits1,bits2){
 		return bits1.high===bits2.high?bits1.low-bits2.low:bits1.high-bits2.high<0?MIN_INT32:MAX_INT32;
 	}
 
 	function within(x,y,maxUlps){
+
+		if(isNaN(x) || isNaN(y)){
+			return false;
+		}
 		
 		var xInt = bits(x);
 		var yInt = bits(y);
 
 		var sgn = xInt.high<0&&yInt.high>0?-1:xInt.high>0&&yInt.high<0?1:0;
 
-		var isEqual;
 		if (sgn === 0) {
 			// number have same sign, there is no risk of overflow
-			isEqual = Math.abs(ulps(xInt,yInt)) <= maxUlps;
+			return Math.abs(ulp(xInt,yInt)) <= maxUlps;
 		} else {
 			// number have opposite signs, take care of overflow
 			var deltaPlus;
 			var deltaMinus;
 			if (sgn < 0) {
-				deltaPlus  = ulps(yInt,POSITIVE_ZERO_BITS);
-				deltaMinus = ulps(xInt,NEGATIVE_ZERO_BITS);
+				deltaPlus  = ulp(yInt,POSITIVE_ZERO_BITS);
+				deltaMinus = ulp(xInt,NEGATIVE_ZERO_BITS);
 			} else {
-				deltaPlus  = ulps(xInt,POSITIVE_ZERO_BITS);
-				deltaMinus = ulps(yInt,NEGATIVE_ZERO_BITS);
+				deltaPlus  = ulp(xInt,POSITIVE_ZERO_BITS);
+				deltaMinus = ulp(yInt,NEGATIVE_ZERO_BITS);
 			}
 
-			if (deltaPlus > maxUlps) {
-				isEqual = false;
+			if (deltaPlus > maxUlps || deltaMinus > maxUlps) {
+				return false;
 			} else {
-				isEqual = deltaMinus <= (maxUlps - deltaPlus);
+				return deltaMinus + deltaPlus <= maxUlps;
 			}
-
 		}
-
-		return isEqual && !isNaN(x) && !isNaN(y);
 	}
 
 	function equals(x,y,eps){
@@ -154,29 +153,6 @@
 		}
 	});
 
-	function log1p(x){
-		return log(1+x);
-	}
-
-	function rint(x){
-
-		var y = Math.floor(x);
-        var d = x - y;
-
-        if (d > 0.5) {
-            if (y === -1.0) {
-                return -0.0; // Preserve sign of operand
-            }
-            return y+1.0;
-        }
-        if (d < 0.5) {
-            return y;
-        }
-
-        /* half way, round to even */
-        return y%2 === 0 ? y : y + 1.0;
-	}
-
 	merge(exports,{
 
 		MAX_INT32: MAX_INT32,
@@ -189,14 +165,11 @@
 		POSITIVE_ZERO_BITS: POSITIVE_ZERO_BITS,
 		NEGATIVE_ZERO_BITS: NEGATIVE_ZERO_BITS,
 	
-		ulps: ulps,
+		ulp: ulp,
 		within: within,
 		equals: equals,
 	
-		ContinuedFraction: ContinuedFraction,
-
-		log1p: log1p,
-		rint: rint
+		ContinuedFraction: ContinuedFraction
 	});
 
 })();

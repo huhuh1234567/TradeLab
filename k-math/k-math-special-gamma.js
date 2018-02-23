@@ -376,17 +376,17 @@
 			throw "NumberIsTooLargeException: "+x;
 		}
 
-		return -K_MATH.log1p(invGamma1pm1(x));
+		return -Math.log(1+invGamma1pm1(x));
 	}
 
 	function gamma(x){
 
-		if ((x == K_MATH.rint(x)) && (x <= 0.0)) {
+		if ((x === Math.round(x)) && (x <= 0.0)) {
 			return Number.NaN;
 		}
 
 		var ret;
-		var absX = FastMath.abs(x);
+		var absX = Math.abs(x);
 		if (absX <= 20.0) {
 			if (x >= 1.0) {
 				/*
