@@ -24,3 +24,16 @@ console.error((1.1920928955078125E-7).toString(16));
 console.error(isNaN(NaN));
 
 console.error((12.5).toString(2));
+
+var NormalDistribution = require("./k-math-distribution-normal").NormalDistribution;
+var dist = new NormalDistribution();
+var dist2 = new NormalDistribution();
+// for(var i=0; i<=2000; i++){
+// 	var x = (i-1000)*0.005;
+// 	console.error(x+","+dist.cumulativeProbability(x));
+// }
+for(var i=0; i<1000; i++){
+	var x = dist.sample();
+	var y = dist2.sample();
+	console.error(x+","+y);
+}

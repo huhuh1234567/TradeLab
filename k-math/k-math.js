@@ -102,7 +102,7 @@
 			var hPrev = this.___getA(0, x);
 
 			// use the value of small as epsilon criteria for zero checks
-			if (Precision.equals(hPrev, 0.0, small)) {
+			if (equals(hPrev, 0.0, small)) {
 				hPrev = small;
 			}
 

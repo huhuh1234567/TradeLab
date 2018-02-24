@@ -2,9 +2,12 @@
 
 	var K_MATH = require("./k-math");
 	var long = K_MATH.long;
+	var MAX_INT32 = K_MATH.MAX_INT32;
 
 	var K_ITERATOR = require("../k/k-iterator");
 	var count_ = K_ITERATOR.count_;
+
+	var sn = 0;
 
 	function WellRandom(k,m1,m2,m3,seed){
 
@@ -27,7 +30,7 @@
 		});
 
 		if(!seed||seed.length===0){
-			seed = long(new Date().getTime());
+			seed = [((Math.random()*2.0-1.0)*MAX_INT32)>>0,((Math.random()*2.0-1.0)*MAX_INT32)>>0];
 		}
 
 		var slen = seed.length;

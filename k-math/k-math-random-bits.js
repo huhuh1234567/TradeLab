@@ -26,8 +26,8 @@
 			var random;
 			if (isNaN(this.___nextGaussian)) {
 				// generate a new pair of gaussian numbers
-				var x = nextDouble();
-				var y = nextDouble();
+				var x = this.nextDouble();
+				var y = this.nextDouble();
 				var alpha = 2 * Math.PI * x;
 				var r     = Math.sqrt(-2 * Math.log(y));
 				random               = r * Math.cos(alpha);

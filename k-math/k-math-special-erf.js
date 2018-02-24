@@ -3,7 +3,7 @@
 	var K = require("../k/k");
 	var merge = K.merge;
 
-	var Gamma = require("./k-math-special-gamma");
+	var Gamma = require("./k-math-special-gamma").Gamma;
 
 	var X_CRIT = 0.4769362762044697;
 	
@@ -133,12 +133,12 @@
 		return erfInv(1.0 - x);
 	}
 
-	merge(exports,{
+	exports.Erf = {
 		erf: erf,
 		erfc: erfc,
 		erf2: erf2,
 		erfInv: erfInv,
 		erfcInv: erfcInv
-	});
+	};
 
 })();

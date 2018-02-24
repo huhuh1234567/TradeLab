@@ -451,12 +451,10 @@
 		logGamma: logGamma,
 		regularizedGammaP: regularizedGammaP,
 		regularizedGammaQ: regularizedGammaQ,
+
+		gamma: gamma,
 		digamma: digamma,
-		trigamma: trigamma,
-		// lanczos: lanczos,
-		// invGamma1pm1: invGamma1pm1,
-		// logGamma1p,
-		gamma,
+		trigamma: trigamma
 	};
 
 })();
