@@ -16,6 +16,7 @@
 	}
 
 	merge(exports,{
+		MS_OF_DAY: MS_OF_DAY,
 		DAY_OF_YEAR: DAY_OF_YEAR,
 		dtm: dtm,
 		ytm: ytm

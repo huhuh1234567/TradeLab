@@ -131,35 +131,23 @@
 		});
 	}
 
-	function array_(arr){
-		var i = 0;
-		var length = arr.length;
-		return merge(new Iterator(),{
-			next: function(){
-				if(i<length){
-					var v = arr[i];
-					i++;
-					return v;
-				}
-				else{
-					return undefined;
-				}
-			}
+	function array_(arr,offset,length){
+		if(offset===undefined||length===undefined){
+			offset = 0;
+			length = arr.length;
+		}
+		return count_(length).map_(function(i){
+			return arr[offset+i];
 		});
 	}
 
-	function array_r_(arr){
-		var i = arr.length;
-		return merge(new Iterator(),{
-			next: function(){
-				if(i>0){
-					i--;
-					return arr[i];
-				}
-				else{
-					return undefined;
-				}
-			}
+	function array_r_(arr,offset,length){
+		if(offset===undefined||length===undefined){
+			offset = 0;
+			length = arr.length;
+		}
+		return count_r_(length).map_(function(i){
+			return arr[offset+i];
 		});
 	}
 

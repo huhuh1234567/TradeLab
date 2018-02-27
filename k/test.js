@@ -5,14 +5,14 @@ merge(global,require("./k-dlink"));
 merge(global,require("./k-avltree"));
 merge(global,require("./k-file-line-iterator"));
 
-DLink.$$(["hjq","zb"])._r_().foreach(function(name){
+array_r_(["hjq","zb"]).foreach(function(name){
 	console.error("hello "+name);
 });
 
 count_(20).foreach(function(){
 
-	var ins = [0,1,2,3,4,5,6,7,8,9];
-	var outs = [0,1,2,3,4,5,6,7,8,9];
+	var ins = ["a","b","c","d","e","f","g","h","i","j"];
+	var outs = ["a","b","c","d","e","f","g","h","i","j"];
 	var tree = new AVLTree();
 	var r;
 	
