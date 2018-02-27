@@ -1,9 +1,9 @@
-
 global.merge = require("./k").merge;
 
 merge(global,require("./k-iterator"));
 merge(global,require("./k-dlink"));
 merge(global,require("./k-avltree"));
+merge(global,require("./k-file-line-iterator"));
 
 DLink.$$(["hjq","zb"])._r_().foreach(function(name){
 	console.error("hello "+name);
@@ -40,3 +40,10 @@ count_(20).foreach(function(){
 	});
 	console.error(r);
 });
+
+var ln = 0;
+new FileLineIterator("E:\\test\\test.txt").foreach(function(v){
+	ln++;
+	console.error(ln+": "+v);
+});
+console.error("total: "+ln);
