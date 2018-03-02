@@ -28,7 +28,7 @@
 		return (h<10?"0"+h:""+h)+sep+(m<10?"0"+m:""+m)+sep+(s<10?"0"+s:""+s);
 	}
 
-	function format(date,sep,dsep,tsep){
+	function formatDateTime(date,sep,dsep,tsep){
 		if(sep===undefined){
 			sep = " ";
 		}
@@ -81,7 +81,7 @@
 		return date;
 	}
 
-	function parse(str,offset,date){
+	function parseDateTime(str,offset,date){
 		if(offset===undefined){
 			offset = 0;
 			date = new Date(0);
@@ -112,11 +112,11 @@
 		
 		formatDate: formatDate,
 		formatTime: formatTime,
-		format: format,
+		formatDateTime: formatDateTime,
 		
 		parseDate: parseDate,
 		parseTime: parseTime,
-		parse: parse,
+		parseDateTime: parseDateTime,
 
 		date2offset: date2offset,
 		offset2date: offset2date

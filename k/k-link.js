@@ -22,7 +22,7 @@
 	Link.$$ = function(arr){
 		var rst = new Link();
 		for(var i=arr.length-1; i>=0; i--){
-			rst.offer(arr[i]);
+			rst.unshift(arr[i]);
 		}
 		return rst;
 	};
@@ -60,10 +60,10 @@
 		head: function(){
 			return this.size===0?undefined:this.___head$._;
 		},
-		offer: function(value){
+		unshift: function(value){
 			Link_insert$(this,null,new LinkNode(value));
 		},
-		poll: function(){
+		shift: function(){
 			var v = undefined;
 			if(this.size>0){
 				v = this.___head$._;

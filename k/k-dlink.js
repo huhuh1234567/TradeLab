@@ -90,10 +90,10 @@
 				return DLink_remove$(this,this.___tail$)._;
 			}
 		},
-		offer: function(value){
+		unshift: function(value){
 			return DLink_insert$(this,new DLinkNode(value),null,this.___head$);
 		},
-		poll: function(list){
+		shift: function(list){
 			if(this.size===0){
 				return undefined;
 			}

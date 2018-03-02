@@ -1,13 +1,25 @@
+global.merge = require("../k/k").merge;
 
-var KTL_DATE = require("./ktl-date");
+merge(global,require("../k/k-iterator"));
+merge(global,require("./ktl"));
+merge(global,require("./ktl-date"));
+merge(global,require("./ktl-data"));
+merge(global,require("./ktl-io"));
 
-var date = new Date();
+var datas = loadDceFutureDataAll("E:/test/dump20171225_all_0");
 
-var str = KTL_DATE.format(date);
+object_(datas).foreach(function(tag_mms){
+	var tag = tag_mms[0];
+	object_(tag_mms[1]).foreach(function(mm_dds){
+		var mm = mm_dds[0];
+		object_(mm_dds[1]).foreach(function(item_data){
+			item_data[1].write("E:/test/dump_dce/"+tag+"_"+mm+"_"+item_data[0]+".ktld");
+		});
+	});
+});
 
-console.error(str);
-console.error(KTL_DATE.format(KTL_DATE.parse(str)));
-
-var offset = KTL_DATE.date2offset(date);
-
-console.error(offset+" "+KTL_DATE.formatDate(KTL_DATE.offset2date(offset)));
+new Data().read("E:/test/dump_dce/m_1805_settle.ktld").output(function(o,v){
+	if(!isNaN(v)&&isFinite(v)){
+		console.error(formatDate(offset2date(o))+"\t"+formatNumber(v,2));
+	}
+});

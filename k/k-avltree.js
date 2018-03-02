@@ -168,11 +168,6 @@
 		___comp: function(l,r){
 			return l===r?0:l<r?-1:1;
 		},
-		find: function(target,block){
-			return Tree_find$(this,target,function(parent$,$,diff){
-				return $===null?undefined:$._;
-			});
-		},
 		___insert$: function(parent$,$,diff){
 			this.size++;
 			if(parent$===null){
