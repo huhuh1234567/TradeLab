@@ -18,6 +18,11 @@
 	}
 
 	merge(Data.prototype,{
+		find: function(offset){
+			var self = this;
+			var index = offset-self.offset;
+			return index>=0&&index<self.data.length?self.data[index]:undefined;
+		},
 		update: function(offset,data){
 			var self = this;
 			if(!(data instanceof Array)){
@@ -149,10 +154,14 @@
 			}
 			return self;
 		},
-		output: function(formatter){
+		_: function(){
 			var self = this;
-			count_(self.data.length).foreach(function(i){
-				return formatter(self.offset+i,self.data[i]);
+			return count_(self.data.length).map_(function(i){
+				var v = self.data[i];
+				return {
+					$: self.offset+i,
+					_: v
+				};
 			});
 		}
 	});

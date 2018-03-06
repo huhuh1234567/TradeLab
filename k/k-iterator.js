@@ -153,7 +153,10 @@
 
 	function object_(obj){
 		return array_(Object.keys(obj)).map_(function(k){
-			return [k,obj[k]];
+			return {
+				$: k,
+				_: obj[k]
+			};
 		});
 	}
 

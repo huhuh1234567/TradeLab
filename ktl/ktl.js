@@ -73,18 +73,6 @@
 		return prefix+part1+part2;
 	}
 
-	console.error(formatNumber(-1234.5678,2));
-	console.error(formatNumber(+8765.4321,2));
-	console.error(formatNumber(12345678,2));
-	console.error(formatNumber(-12345678,2));
-	console.error(formatNumber(0.0,2));
-	console.error(formatNumber(-0.0,2));
-	console.error(formatNumber(0.5678,2));
-	console.error(formatNumber(-0.5678,2));
-	console.error(formatNumber(0.999,2));
-	console.error(formatNumber(-0.999,2));
-	console.error(formatNumber(-0.001,2));
-
 	merge(exports,{
 		MS_OF_DAY: MS_OF_DAY,
 		DAY_OF_YEAR: DAY_OF_YEAR,

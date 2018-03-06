@@ -51,29 +51,29 @@
 
 	function upsert(dst,offset,src){
 		object_(src).foreach(function(kv){
-			upsert$(dst,kv[0],function(){
-				return new Data(offset,kv[1]);
+			upsert$(dst,kv.$,function(){
+				return new Data(offset,kv._);
 			},function(d){
-				d.update(offset,kv[1]);
+				d.update(offset,kv._);
 			});
 		});
 	}
 
 	function combine(dst,src){
 		object_(src).foreach(function(kv){
-			var d = upsert$(dst,kv[0],function(){
+			var d = upsert$(dst,kv.$,function(){
 				return new Data();
 			});
-			d.update(kv[1].offset,kv[1].data);
+			d.update(kv._.offset,kv._.data);
 		});
 	}
 
 	function combineAll(dst,src){
 		object_(src).foreach(function(tag_smms){
-			var dmms = object$(dst,tag_smms[0]);
-			object_(tag_smms[1]).foreach(function(mm_sdds){
-				var ddds = object$(dmms,mm_sdds[0]);
-				combine(ddds,mm_sdds[1]);
+			var dmms = object$(dst,tag_smms.$);
+			object_(tag_smms._).foreach(function(mm_sdds){
+				var ddds = object$(dmms,mm_sdds.$);
+				combine(ddds,mm_sdds._);
 			});
 		});
 	}
