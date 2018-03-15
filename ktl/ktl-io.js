@@ -18,7 +18,7 @@
 	var FileLineIterator = require("../k/k-file-line-iterator").FileLineIterator;
 
 	var KTL_DATE = require("../ktl/ktl-date");
-	var parseDate = KTL_DATE.parseDate;
+	var DateFormat = KTL_DATE.DateFormat;
 	var date2offset = KTL_DATE.date2offset;
 
 	var Data = require("../ktl/ktl-data").Data;
@@ -49,6 +49,9 @@
 		DCE_NAME_MAP.put(v);
 	});
 
+	var DF_Y_M_D = new DateFormat("yyyy-MM-dd");
+	var DF_YMD = new DateFormat("yyyyMMdd");
+
 	function upsert(dst,offset,src){
 		object_(src).foreach(function(kv){
 			upsert$(dst,kv.$,function(){
@@ -69,16 +72,28 @@
 	}
 
 	function combineAll(dst,src){
-		object_(src).foreach(function(tag_smms){
-			var dmms = object$(dst,tag_smms.$);
-			object_(tag_smms._).foreach(function(mm_sdds){
-				var ddds = object$(dmms,mm_sdds.$);
-				combine(ddds,mm_sdds._);
-			});
+		object_(src).foreach(function(tag_sdds){
+			var ddds = object$(dst,tag_sdds.$);
+			combine(ddds,tag_sdds._);
 		});
 	}
 
-	function loadDceFutureData(path,date){
+	function loadShiborCrawlData(path,type){
+
+		var rst = {};
+		
+		var lines = new FileLineIterator(path);
+		lines.foreach(function(line){
+			var vs = line.split("|");
+			upsert(object$(rst,"shibor_"+type),date2offset(DF_Y_M_D.parse(vs[0])),{
+				rate: parseFloat(vs[1])*0.01
+			});
+		});
+
+		return rst;
+	}
+
+	function loadDceFutureCrawlData(path,date){
 
 		var rst = {};
 
@@ -89,14 +104,15 @@
 			var vs = line.split(/\s+/);
 			var name_code = DCE_NAME_MAP.find([vs[0],""]);
 			if(name_code!==undefined){
-				upsert(object$(object$(rst,name_code[1]),vs[1]),offset,{
+				upsert(object$(rst,name_code[1]+"_"+vs[1]),offset,{
 					open: parseFloat(vs[2].replace(/,/g,"")),
 					high: parseFloat(vs[3].replace(/,/g,"")),
 					low: parseFloat(vs[4].replace(/,/g,"")),
 					close: parseFloat(vs[5].replace(/,/g,"")),
 					settle: parseFloat(vs[7].replace(/,/g,"")),
 					vol: parseFloat(vs[10].replace(/,/g,"")),
-					oi: parseFloat(vs[11].replace(/,/g,""))
+					oi: parseFloat(vs[11].replace(/,/g,"")),
+					amount: parseFloat(vs[13].replace(/,/g,""))
 				});
 			}
 		});
@@ -104,7 +120,7 @@
 		return rst;
 	}
 
-	function loadDceFutureDataAll(path){
+	function loadDceFutureCrawlDataMulti(path){
 
 		var rst = {};
 
@@ -112,8 +128,10 @@
 			var name_suffix = fn.split(/\./);
 			if(name_suffix[1]==="txt"){
 				var tag_type_date = name_suffix[0].split(/_/);
-				var date = parseDate(tag_type_date[2]);
-				combineAll(rst,loadDceFutureData(path+"/"+fn,date))
+				if(tag_type_date[1]==="0"){
+					var date = DF_Y_M_D.parse(tag_type_date[2]);
+					combineAll(rst,loadDceFutureCrawlData(path+"/"+fn,date))
+				}
 			}
 		});
 
@@ -121,8 +139,12 @@
 	}
 
 	merge(exports,{
-		loadDceFutureData: loadDceFutureData,
-		loadDceFutureDataAll: loadDceFutureDataAll
+		upsert: upsert,
+		combine: combine,
+		combineAll: combineAll,
+		loadShiborCrawlData: loadShiborCrawlData,
+		loadDceFutureCrawlData: loadDceFutureCrawlData,
+		loadDceFutureCrawlDataMulti: loadDceFutureCrawlDataMulti
 	});
 
 })();

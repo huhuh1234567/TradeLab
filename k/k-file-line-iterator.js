@@ -1,6 +1,7 @@
 (function(){
 
 	var fs = require("fs");
+	var iconv = require("iconv-lite");
 
 	var K = require("./k");
 	var merge = K.merge;
@@ -25,7 +26,7 @@
 	function FileLineIterator(path,encoding){
 		var fd = fs.openSync(path,"r");
 		var buf = new Buffer(BUFFER_SIZE);
-		var pending = null;
+		var pending = [];
 		var last = 0;
 		var bufs = [];
 		var len = 1;
@@ -72,43 +73,36 @@
 									}
 								}
 								if(neos.length>0){
-									//concat first
-									if(pending!==null){
-										bufs.push(Buffer.concat([pending,neos.shift()]));
-										pending = null;
+									//concat head
+									if(pending.length>0){
+										pending.push(neos.shift());
+										bufs.push(Buffer.concat(pending));
+										pending = [];
 									}
-									//push completed
+									//push mid
 									while(neos.length>0){
 										bufs.push(neos.shift());
 									}
-									//pending last
-									if(start<curr){
-										pending = clone(buf,start,curr);
-									}
 								}
-								else{
-									//concat last
-									if(pending!==null){
-										pending = Buffer.concat([pending,buf.slice(start,curr)]);
-									}
-									else{
-										pending = clone(buf,start,curr);
-									}
+								if(start<curr){
+									//pending tail
+									pending.push(clone(buf,start,curr));
 								}
+								//save last char
 								last = buf[len-1];
 							}
 							else{
 								//end of file
-								if(pending!==null){
-									bufs.push(pending);
-									pending = null;
+								if(pending.length>0){
+									bufs.push(Buffer.concat(pending));
+									pending = [];
 								}
 							}
 						}
 					}
 					if(bufs.length>0){
 						var b = bufs.shift();
-						v = encoding===undefined?b.toString():b.toString(encoding);
+						v = encoding===undefined?b.toString():iconv.decode(b,encoding);
 					}
 					else{
 						fs.closeSync(fd);

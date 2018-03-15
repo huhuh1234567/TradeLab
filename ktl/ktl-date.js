@@ -3,102 +3,214 @@
 	var K = require("../k/k");
 	var merge = K.merge;
 
+	var K_ITERATOR = require("../k/k-iterator");
+	var array_ = K_ITERATOR.array_;
+
+	var K_AVLTREE = require("../k/k-avltree");
+	var AVLTree = K_AVLTREE.AVLTree;
+
 	var KTL = require("./ktl");
 	var MS_OF_DAY = KTL.MS_OF_DAY;
 
 	var TIMEZONE_OFFSET = new Date().getTimezoneOffset()*60000;
 
-	function formatDate(date,sep){
-		if(sep===undefined){
-			sep = "-";
+	function CopyProcessorCreator(pattern){
+		return {
+			length: function(){
+				return pattern.length;
+			},
+			parse: function(str,offset,date){
+				return date;
+			},
+			format: function(date){
+				return pattern;
+			}
 		}
-		var y = date.getFullYear();
-		var m = date.getMonth();
-		var d = date.getDate();
-		return y+sep+(m<9?"0"+(m+1):""+(m+1))+sep+(d<10?"0"+d:""+d);
 	}
 
-	function formatTime(date,sep){
-		if(sep===undefined){
-			sep = ":";
+	var PROCESSOR_MAP = new AVLTree(function(l,r){
+		return l.$===r.$?0:l.$<r.$?-1:1;
+	});
+	array_([{
+		$: "yyyy",
+		_: {
+			length: function(){
+				return 4;
+			},
+			parse: function(str,offset,date){
+				date.setFullYear(parseInt(str.substring(offset,offset+4)));
+				return date;
+			},
+			format: function(date){
+				var v = date.getFullYear();
+				return v<10?"000"+v:v<100?"00"+v:v<1000?"0"+v:""+v;
+			}
 		}
-		var h = date.getHours();
-		var m = date.getMinutes();
-		var s = date.getSeconds();
-		return (h<10?"0"+h:""+h)+sep+(m<10?"0"+m:""+m)+sep+(s<10?"0"+s:""+s);
-	}
+	},{
+		$: "MM",
+		_: {
+			length: function(){
+				return 2;
+			},
+			parse: function(str,offset,date){
+				date.setMonth(parseInt(str.substring(offset,offset+2))-1);
+				return date;
+			},
+			format: function(date){
+				var v = date.getMonth()+1;
+				return v<10?"0"+v:""+v;
+			}
+		}
+	},{
+		$: "dd",
+		_: {
+			length: function(){
+				return 2;
+			},
+			parse: function(str,offset,date){
+				date.setDate(parseInt(str.substring(offset,offset+2)));
+				return date;
+			},
+			format: function(date){
+				var v = date.getDate();
+				return v<10?"0"+v:""+v;
+			}
+		}
+	},{
+		$: "HH",
+		_: {
+			length: function(){
+				return 2;
+			},
+			parse: function(str,offset,date){
+				date.setHours(parseInt(str.substring(offset,offset+2)));
+				return date;
+			},
+			format: function(date){
+				var v = date.getDate();
+				return v<10?"0"+v:""+v;
+			}
+		}
+	},{
+		$: "mm",
+		_: {
+			length: function(){
+				return 2;
+			},
+			parse: function(str,offset,date){
+				date.setMinutes(parseInt(str.substring(offset,offset+2)));
+				return date;
+			},
+			format: function(date){
+				var v = date.getDate();
+				return v<10?"0"+v:""+v;
+			}
+		}
+	},{
+		$: "ss",
+		_: {
+			length: function(){
+				return 2;
+			},
+			parse: function(str,offset,date){
+				date.setSeconds(parseInt(str.substring(offset,offset+2)));
+				return date;
+			},
+			format: function(date){
+				var v = date.getDate();
+				return v<10?"0"+v:""+v;
+			}
+		}
+	},{
+		$: "SSS",
+		_: {
+			length: function(){
+				return 3;
+			},
+			parse: function(str,offset,date){
+				date.setMilliseconds(parseInt(str.substring(offset,offset+2)));
+				return date;
+			},
+			format: function(date){
+				var v = date.getDate();
+				return v<10?"00"+v:v<100?"0"+v:""+v;
+			}
+		}
+	}]).foreach(function(v){
+		PROCESSOR_MAP.put(v);
+	});
 
-	function formatDateTime(date,sep,dsep,tsep){
-		if(sep===undefined){
-			sep = " ";
-		}
-		return formatDate(date,dsep)+sep+formatTime(date,tsep);
-	}
+	function DateFormat(pattern){
 
-	function parseDate(str,offset,date){
-		if(offset===undefined){
-			offset = 0;
-			date = new Date(0);
-		}
-		else if(date===undefined){
-			if(offset instanceof Date){
-				date = offset;
-				offset = 0;
+		//find pattern splits
+		var splits = [];
+		PROCESSOR_MAP._().foreach(function(tag_processor){
+			var ti = pattern.indexOf(tag_processor.$);
+			if(ti>=0){
+				splits.push({
+					$: ti,
+					_: tag_processor._
+				});
+			}
+		});
+		splits.sort(function(l,r){
+			return l.$-r.$;
+		});
+
+		//list pattern processors
+		var offset = 0;
+		var index = 0;
+		this.___ps = [];
+		while(offset<pattern.length){
+			if(index<splits.length){
+				
+				var split = splits[index];
+				index++;
+
+				if(offset<split.$){
+					this.___ps.push(CopyProcessorCreator(pattern.substring(offset,split.$)));
+					offset = split.$;
+				}
+				this.___ps.push(split._);
+				offset += split._.length();
 			}
 			else{
-				date = new Date(TIMEZONE_OFFSET);
+				this.___ps.push(CopyProcessorCreator(pattern.substring(offset,pattern.length)));
+				offset = pattern.length;
 			}
 		}
-		var y = str.substring(offset,offset+4);
-		var m = str.substring(offset+5,offset+7);
-		var d = str.substring(offset+8,offset+10);
-		date.setFullYear(parseInt(y));
-		date.setMonth(parseInt(m)-1);
-		date.setDate(parseInt(d));
-		return date;
 	}
 
-	function parseTime(str,offset,date){
-		if(offset===undefined){
-			offset = 0;
-			date = new Date(0);
-		}
-		else if(date===undefined){
-			if(offset instanceof Date){
-				date = offset;
+	merge(DateFormat.prototype,{
+		parse: function(str,offset,date){
+			if(offset===undefined){
 				offset = 0;
+				date = new Date(0);
 			}
-			else{
-				date = new Date(TIMEZONE_OFFSET);
+			else if(date===undefined){
+				if(offset instanceof Date){
+					date = offset;
+					offset = 0;
+				}
+				else{
+					date = new Date(TIMEZONE_OFFSET);
+				}
 			}
+			var offset = 0;
+			array_(this.___ps).foreach(function(proc){
+				proc.parse(str,offset,date);
+				offset += proc.length();
+			});
+			return date;
+		},
+		format: function(date){
+			var rst = "";
+			array_(this.___ps).foreach(function(proc){
+				rst += proc.format(date);
+			});
+			return rst;
 		}
-		var h = str.substring(offset,offset+2);
-		var m = str.substring(offset+3,offset+5);
-		var s = str.substring(offset+6,offset+8);
-		date.setHours(parseInt(h));
-		date.setMinutes(parseInt(m));
-		date.setSeconds(parseInt(s));
-		return date;
-	}
-
-	function parseDateTime(str,offset,date){
-		if(offset===undefined){
-			offset = 0;
-			date = new Date(0);
-		}
-		else if(date===undefined){
-			if(offset instanceof Date){
-				date = offset;
-				offset = 0;
-			}
-			else{
-				date = new Date(TIMEZONE_OFFSET);
-			}
-		}
-		parseDate(str,offset,date);
-		parseTime(str,offset+11,date);
-		return date;
-	}
+	});
 
 	function date2offset(date){
 		return Math.floor((date.getTime()-TIMEZONE_OFFSET)/MS_OF_DAY)>>0;
@@ -109,14 +221,8 @@
 	}
 
 	merge(exports,{
-		
-		formatDate: formatDate,
-		formatTime: formatTime,
-		formatDateTime: formatDateTime,
-		
-		parseDate: parseDate,
-		parseTime: parseTime,
-		parseDateTime: parseDateTime,
+
+		DateFormat: DateFormat,
 
 		date2offset: date2offset,
 		offset2date: offset2date
