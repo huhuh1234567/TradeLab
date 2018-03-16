@@ -82,8 +82,7 @@
 
 		var rst = {};
 		
-		var lines = new FileLineIterator(path);
-		lines.foreach(function(line){
+		new FileLineIterator(path).foreach(function(line){
 			var vs = line.split("|");
 			upsert(object$(rst,"shibor_"+type),date2offset(DF_Y_M_D.parse(vs[0])),{
 				rate: parseFloat(vs[1])*0.01

@@ -5,6 +5,7 @@
 
 	var K_ITERATOR = require("../k/k-iterator");
 	var array_ = K_ITERATOR.array_;
+	var object_ = K_ITERATOR.object_;
 
 	var K_AVLTREE = require("../k/k-avltree");
 	var AVLTree = K_AVLTREE.AVLTree;
@@ -28,12 +29,8 @@
 		}
 	}
 
-	var PROCESSOR_MAP = new AVLTree(function(l,r){
-		return l.$===r.$?0:l.$<r.$?-1:1;
-	});
-	array_([{
-		$: "yyyy",
-		_: {
+	var processors = {
+		"yyyy": {
 			length: function(){
 				return 4;
 			},
@@ -45,10 +42,8 @@
 				var v = date.getFullYear();
 				return v<10?"000"+v:v<100?"00"+v:v<1000?"0"+v:""+v;
 			}
-		}
-	},{
-		$: "MM",
-		_: {
+		},
+		"MM": {
 			length: function(){
 				return 2;
 			},
@@ -60,10 +55,8 @@
 				var v = date.getMonth()+1;
 				return v<10?"0"+v:""+v;
 			}
-		}
-	},{
-		$: "dd",
-		_: {
+		},
+		"dd": {
 			length: function(){
 				return 2;
 			},
@@ -75,10 +68,8 @@
 				var v = date.getDate();
 				return v<10?"0"+v:""+v;
 			}
-		}
-	},{
-		$: "HH",
-		_: {
+		},
+		"HH": {
 			length: function(){
 				return 2;
 			},
@@ -90,10 +81,8 @@
 				var v = date.getDate();
 				return v<10?"0"+v:""+v;
 			}
-		}
-	},{
-		$: "mm",
-		_: {
+		},
+		"mm": {
 			length: function(){
 				return 2;
 			},
@@ -105,10 +94,8 @@
 				var v = date.getDate();
 				return v<10?"0"+v:""+v;
 			}
-		}
-	},{
-		$: "ss",
-		_: {
+		},
+		"ss": {
 			length: function(){
 				return 2;
 			},
@@ -120,10 +107,8 @@
 				var v = date.getDate();
 				return v<10?"0"+v:""+v;
 			}
-		}
-	},{
-		$: "SSS",
-		_: {
+		},
+		"SSS": {
 			length: function(){
 				return 3;
 			},
@@ -136,15 +121,13 @@
 				return v<10?"00"+v:v<100?"0"+v:""+v;
 			}
 		}
-	}]).foreach(function(v){
-		PROCESSOR_MAP.put(v);
-	});
+	};
 
 	function DateFormat(pattern){
 
 		//find pattern splits
 		var splits = [];
-		PROCESSOR_MAP._().foreach(function(tag_processor){
+		object_(processors).foreach(function(tag_processor){
 			var ti = pattern.indexOf(tag_processor.$);
 			if(ti>=0){
 				splits.push({

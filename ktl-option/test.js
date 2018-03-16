@@ -15,3 +15,13 @@ var delta = model.delta(s,k,r,iv,day,mday,d);
 var gamma = model.gamma(s,k,r,iv,day,mday,d);
 
 console.error("iv="+iv+", pp="+pp+", delta="+delta+", gamma="+gamma);
+
+var KTL_DATE = require("../ktl/ktl-date");
+var DateFormat = KTL_DATE.DateFormat;
+var date2offset = KTL_DATE.date2offset;
+var offset2date = KTL_DATE.offset2date;
+
+var df = new DateFormat("yyyy-MM-dd");
+
+console.error("offset="+date2offset(df.parse("2000-01-01")));
+console.error("date="+df.format(offset2date(16384)));
