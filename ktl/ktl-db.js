@@ -232,29 +232,9 @@
 							buf.writeDoubleLE(target.data[index],i<<SHIFT_VAL);
 							index++;
 						});
-						if(page!==undefined){
-							//read to buffer
-							var fd = fs.openSync(page._,"r");
-							len = fs.readSync(fd,buf,0,rest<<SHIFT_VAL,(slot<<SHIFT_BUFFER)+(start<<SHIFT_VAL))>>SHIFT_VAL;
-							fs.closeSync(fd);
-							//truncate to below rest
-							if(len>rest){
-								len = rest;
-							}
-							//fill data
-							count_(len).foreach(function(i){
-								rst.data[index] = buf.readDoubleLE(i<<SHIFT_VAL);
-								index++;
-							});
-						}
-						//pad NaN
-						rest -= len;
-						if(rest>0){
-							count_(rest).foreach(function(i){
-								rst.data[index] = Number.NaN;
-								index++;
-							});
-						}
+						var fd = fs.openSync(path,"r");
+						fs.writeSync(fd,buf,0,rest<<SHIFT_VAL,(slot<<SHIFT_BUFFER)+(start<<SHIFT_VAL));
+						fs.closeSync(fd);
 					}
 				}
 			}
