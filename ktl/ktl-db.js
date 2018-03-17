@@ -14,8 +14,8 @@
 
 	var Data = require("../ktl/ktl-data").Data;
 
-	var LEN_SEGMENT = 8192;
 	var LEN_SLOT = 1024;
+	var LEN_SEGMENT = 8192;
 	var LEN_VAL = 8;
 
 	var LEN_BUFFER = LEN_SEGMENT*LEN_VAL;
@@ -145,8 +145,118 @@
 				}
 				return rst;
 			},
-			save: function(name,data){
+			save: function(name,target){
+				var fiber = fibers[name];
+				var cluster,slot,offset,length;
+				if(fiber===undefined){
+					var index = total;
+					total++;
+					cluster = index>>SHIFT_SLOT;
+					slot = index-(cluster<<SHIFT_SLOT);
+					offset = target.offset;
+					length = target.data.length;
+					fiber = [cluster,slot,offset,length];
+					fibers[name] = fiber;
+				}
+				else{
+					cluster = fiber[0];
+					slot = fiber[1];
+					if(target.length===0){
+						offset = fiber[2];
+						length = fiber[3];
+					}
+					else{
+						offset = Math.min(target.offset,fiber[2]);
+						length = Math.max(target.offset+target.data.length,fiber[2]+fiber[3])-offset;
+					}
+					fiber[2] = offset;
+					fiber[3] = length;
+				}
+				if(target.data.length>0){
+	
+					offset = target.offset;
+					length = target.data.length;
 
+					var index = 0;
+
+					var cluster_pages = cluster2pages.find({
+						$: cluster
+					});
+					if(cluster_pages===undefined){
+						cluster_pages = {
+							$: cluster,
+							_: new AVLTree($comp)
+						};
+						cluster2pages.put(cluster_pages);
+					}
+					var pages = cluster_pages._;
+						
+					var current = offset;
+
+					var buf = new Buffer(LEN_BUFFER);
+
+					var rest;
+					while((rest=offset+length-current)>0){
+						//truncate to within segment
+						var segment = current>>SHIFT_SEGMENT;
+						var start = current-(segment<<SHIFT_SEGMENT);
+						rest = Math.min(rest,LEN_SEGMENT-start);
+						//step to next
+						current += rest;
+						//find file
+						var path;
+						var page = pages.find({
+							$: segment
+						});
+						if(page===undefined){
+							path = dir+"/"+tag+"_"+cluster+"_"+segment;
+							count_(LEN_SEGMENT).foreach(function(i){
+								buf.writeDoubleLE(Number.NaN,i<<SHIFT_VAL);
+							});
+							var fd = fs.openSync(path,"w");
+							count_(LEN_SLOT).foreach(function(i){
+								fs.writeSync(fd,buf,0,LEN_BUFFER,i<<LEN_BUFFER);
+							});
+							fs.closeSync(fd);
+							page = {
+								$: segment,
+								_: path
+							};
+							pages.put(page);
+						}
+						else{
+							path = page._;
+						}
+						//write data
+						count_(rest).foreach(function(i){
+							buf.writeDoubleLE(target.data[index],i<<SHIFT_VAL);
+							index++;
+						});
+						if(page!==undefined){
+							//read to buffer
+							var fd = fs.openSync(page._,"r");
+							len = fs.readSync(fd,buf,0,rest<<SHIFT_VAL,(slot<<SHIFT_BUFFER)+(start<<SHIFT_VAL))>>SHIFT_VAL;
+							fs.closeSync(fd);
+							//truncate to below rest
+							if(len>rest){
+								len = rest;
+							}
+							//fill data
+							count_(len).foreach(function(i){
+								rst.data[index] = buf.readDoubleLE(i<<SHIFT_VAL);
+								index++;
+							});
+						}
+						//pad NaN
+						rest -= len;
+						if(rest>0){
+							count_(rest).foreach(function(i){
+								rst.data[index] = Number.NaN;
+								index++;
+							});
+						}
+					}
+				}
 			}
 		};
 	}
