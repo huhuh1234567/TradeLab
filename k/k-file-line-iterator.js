@@ -24,7 +24,7 @@
 	}
 
 	function FileLineIterator(path,encoding){
-		var fd = fs.openSync(path,"r");
+		var fd = 0;
 		var buf = new Buffer(BUFFER_SIZE);
 		var pending = [];
 		var last = 0;
@@ -38,75 +38,86 @@
 				}
 				else{
 					var v = undefined;
-					if(bufs.length===0&&len>0){
-						while(bufs.length===0&&len>0){
-							len = fs.readSync(fd,buf,0,BUFFER_SIZE);
-							if(len>0){
-								//split
-								var neos = [];
-								//...\r \n...
-								var start = last===CR&&buf[0]===LF?1:0;
-								var curr = start;
-								while(curr<len){
-									var sep = -1;
-									if(buf[curr]===LF){
-										//\n
-										sep = curr;
-										curr++;
-									}
-									else if(buf[curr]===CR){
-										//\r
-										sep = curr;
-										curr++;
-										if(curr<len&&buf[curr]===LF){
-											//\r\n
+					if(fd===0){
+						if(fs.existsSync(path)){
+							fd = fs.openSync(path,"r");
+						}
+						else{
+							end = true;
+						}
+					}
+					if(fd!==0){
+						if(bufs.length===0&&len>0){
+							while(bufs.length===0&&len>0){
+								len = fs.readSync(fd,buf,0,BUFFER_SIZE);
+								if(len>0){
+									//split
+									var neos = [];
+									//...\r \n...
+									var start = last===CR&&buf[0]===LF?1:0;
+									var curr = start;
+									while(curr<len){
+										var sep = -1;
+										if(buf[curr]===LF){
+											//\n
+											sep = curr;
 											curr++;
 										}
+										else if(buf[curr]===CR){
+											//\r
+											sep = curr;
+											curr++;
+											if(curr<len&&buf[curr]===LF){
+												//\r\n
+												curr++;
+											}
+										}
+										else{
+											//this line
+											curr++;
+										}
+										if(sep>=0){
+											neos.push(clone(buf,start,sep));
+											start = curr;
+										}
 									}
-									else{
-										//this line
-										curr++;
+									if(neos.length>0){
+										//concat head
+										if(pending.length>0){
+											pending.push(neos.shift());
+											bufs.push(Buffer.concat(pending));
+											pending = [];
+										}
+										//push mid
+										while(neos.length>0){
+											bufs.push(neos.shift());
+										}
 									}
-									if(sep>=0){
-										neos.push(clone(buf,start,sep));
-										start = curr;
+									if(start<curr){
+										//pending tail
+										pending.push(clone(buf,start,curr));
 									}
+									//save last char
+									last = buf[len-1];
 								}
-								if(neos.length>0){
-									//concat head
+								else{
+									//end of file
 									if(pending.length>0){
-										pending.push(neos.shift());
 										bufs.push(Buffer.concat(pending));
 										pending = [];
 									}
-									//push mid
-									while(neos.length>0){
-										bufs.push(neos.shift());
-									}
-								}
-								if(start<curr){
-									//pending tail
-									pending.push(clone(buf,start,curr));
-								}
-								//save last char
-								last = buf[len-1];
-							}
-							else{
-								//end of file
-								if(pending.length>0){
-									bufs.push(Buffer.concat(pending));
-									pending = [];
 								}
 							}
 						}
-					}
-					if(bufs.length>0){
-						var b = bufs.shift();
-						v = encoding===undefined?b.toString():iconv.decode(b,encoding);
-					}
-					else{
-						fs.closeSync(fd);
-						end = true;
+						if(bufs.length>0){
+							var b = bufs.shift();
+							v = encoding===undefined?b.toString():iconv.decode(b,encoding);
+						}
+						else{
+							fs.closeSync(fd);
+							fd = 0;
+							end = true;
+						}
 					}
 					return v;
 				}
@@ -114,6 +125,7 @@
 			close: function(){
 				if(!end){
 					fs.closeSync(fd);
+					fd = 0;
 					end = true;
 				}
 			}

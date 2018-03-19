@@ -21,7 +21,7 @@
 		find: function(offset){
 			var self = this;
 			var index = offset-self.offset;
-			return index>=0&&index<self.data.length?self.data[index]:undefined;
+			return index>=0&&index<self.data.length?self.data[index]:Number.NaN;
 		},
 		update: function(offset,data){
 			var self = this;
@@ -104,52 +104,6 @@
 						}
 						self.offset = offset;
 					}
-				}
-			}
-			return self;
-		},
-		write: function(path){
-			var self = this;
-			var buf = new Buffer(BUFFER_SIZE);
-			var fd = fs.openSync(path,"w");
-			var offset = 0;
-			buf.writeInt32LE(self.offset,offset);
-			offset += 4;
-			buf.writeInt32LE(self.data.length,offset);
-			offset += 4;
-			array_(self.data).foreach(function(v){
-				buf.writeDoubleLE(v,offset);
-				offset += 8;
-				if(offset>=BUFFER_SIZE){
-					fs.writeSync(fd,buf,0,offset);
-					offset = 0;
-				}
-			});
-			if(offset>0){
-				fs.writeSync(fd,buf,0,offset);
-			}
-			fs.closeSync(fd);
-			return self;
-		},
-		read: function(path){
-			var self = this;
-			var buf = new Buffer(BUFFER_SIZE);
-			var fd = fs.openSync(path,"r");
-			var len = fs.readSync(fd,buf,0,BUFFER_SIZE);
-			if(len>=8){
-				var offset = 0;
-				self.offset = buf.readInt32LE(offset);
-				offset += 4;
-				self.data = new Array(buf.readInt32LE(offset));
-				offset += 4;
-				var i = 0;
-				while(len>0){
-					while(offset<len){
-						self.data[i] = buf.readDoubleLE(offset);
-						offset += 8;
-						i++;
-					}
-					len = fs.readSync(fd,buf,0,BUFFER_SIZE);
 				}
 			}
 			return self;

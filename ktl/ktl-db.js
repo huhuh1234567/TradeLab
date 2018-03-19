@@ -1,5 +1,7 @@
 (function(){
 
+	var fs = require("fs");
+
 	var K = require("../k/k");
 	var merge = K.merge;
 
@@ -79,7 +81,7 @@
 		});
 
 		return {
-			load: function(name){
+			load: function(name,toffset,tlength){
 				var rst = new Data();
 				var fiber = fibers[name];
 				if(fiber!==undefined){
@@ -88,6 +90,17 @@
 					var offset = fiber[2];
 					var length = fiber[3];
 					if(length>0){
+
+						var end = offset+length;
+
+						if(toffset!==undefined){
+							offset = Math.min(offset,toffset);
+						}
+
+						if(tlength!==undefined){
+							end = Math.max(end,toffset+tlength);
+							length = end-offset;
+						}
 
 						rst.offset = offset;
 						rst.data = new Array(length);
@@ -146,6 +159,8 @@
 				return rst;
 			},
 			save: function(name,target){
+				var fd;
+				//calculate fiber
 				var fiber = fibers[name];
 				var cluster,slot,offset,length;
 				if(fiber===undefined){
@@ -172,6 +187,7 @@
 					fiber[2] = offset;
 					fiber[3] = length;
 				}
+				//save data
 				if(target.data.length>0){
 	
 					offset = target.offset;
@@ -213,9 +229,9 @@
 							count_(LEN_SEGMENT).foreach(function(i){
 								buf.writeDoubleLE(Number.NaN,i<<SHIFT_VAL);
 							});
-							var fd = fs.openSync(path,"w");
+							fd = fs.openSync(path,"w");
 							count_(LEN_SLOT).foreach(function(i){
-								fs.writeSync(fd,buf,0,LEN_BUFFER,i<<LEN_BUFFER);
+								fs.writeSync(fd,buf,0,LEN_BUFFER,i<<SHIFT_BUFFER);
 							});
 							fs.closeSync(fd);
 							page = {
@@ -232,13 +248,22 @@
 							buf.writeDoubleLE(target.data[index],i<<SHIFT_VAL);
 							index++;
 						});
-						var fd = fs.openSync(path,"r");
+						var fd = fs.openSync(path,"r+");
 						fs.writeSync(fd,buf,0,rest<<SHIFT_VAL,(slot<<SHIFT_BUFFER)+(start<<SHIFT_VAL));
 						fs.closeSync(fd);
 					}
 				}
+				//save fibers
+				fd = fs.openSync(dir+"/"+tag,"w");
+				object_(fibers).foreach(function(kv){
+					var strbuf = new Buffer([kv.$,kv._[0],kv._[1],kv._[2],kv._[3]].join("|")+"\n","utf8");
+					fs.writeSync(fd,strbuf,0,strbuf.length);
+				});
+				fs.closeSync(fd);
 			}
 		};
 	}
+
+	exports.Database = Database;
 
 })();
