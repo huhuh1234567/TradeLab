@@ -253,8 +253,10 @@
 						fs.closeSync(fd);
 					}
 				}
+			},
+			sync: function(){
 				//save fibers
-				fd = fs.openSync(dir+"/"+tag,"w");
+				var fd = fs.openSync(dir+"/"+tag,"w");
 				object_(fibers).foreach(function(kv){
 					var strbuf = new Buffer([kv.$,kv._[0],kv._[1],kv._[2],kv._[3]].join("|")+"\n","utf8");
 					fs.writeSync(fd,strbuf,0,strbuf.length);

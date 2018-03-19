@@ -5,6 +5,8 @@ merge(global,require("./k-dlink"));
 merge(global,require("./k-avltree"));
 merge(global,require("./k-file-line-iterator"));
 
+console.error(parseInt("ROWNUM"));
+
 array_r_(["hjq","zb"]).foreach(function(name){
 	console.error("hello "+name);
 });

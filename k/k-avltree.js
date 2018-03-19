@@ -20,10 +20,12 @@
 		return $.right$===null?0:$.right$.height;
 	}
 
+	function height(lh,rh){
+		return (lh<rh?rh:lh)+1;
+	}
+
 	function AVLTreeNode_height($){
-		var lh = AVLTreeNode_left$height($);
-		var rh = AVLTreeNode_right$height($);
-		return lh<rh?rh:lh;
+		return height(AVLTreeNode_left$height($),AVLTreeNode_right$height($))
 	}
 
 	function AVLTree(comp){
@@ -144,7 +146,7 @@
 		while($!==null){
 			var lh = AVLTreeNode_left$height($);
 			var rh = AVLTreeNode_right$height($);
-			var h = lh<rh?rh:lh;
+			var h = height(lh,rh);
 			var d = lh-rh;
 			//check if fix over
 			if($.height===h&&d>=-1&&d<=1){
@@ -168,8 +170,9 @@
 		___comp: function(l,r){
 			return l===r?0:l<r?-1:1;
 		},
-		___insert$: function(parent$,$,diff){
+		___insert$: function(parent$,value,diff){
 			this.size++;
+			var $ = new AVLTreeNode(value);
 			if(parent$===null){
 				//root node
 				this.___root$ = $;
@@ -188,7 +191,7 @@
 					$ = parent$;
 					var lh = AVLTreeNode_left$height($);
 					var rh = AVLTreeNode_right$height($);
-					var h = lh<rh?rh:lh;
+					var h = height(lh,rh);
 					//check if fix over
 					if($.height===h){
 						break;

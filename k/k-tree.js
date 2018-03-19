@@ -127,7 +127,7 @@
 					$._ = value;
 				}
 				else{
-					tree.___insert$(parent$,new TreeNode(value),diff);
+					tree.___insert$(parent$,value,diff);
 				}
 			});
 		},

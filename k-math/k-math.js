@@ -3,6 +3,35 @@
 	var K = require("../k/k");
 	var merge = K.merge;
 
+	function div2(l,r){
+		//check negative
+		var nl = l<0;
+		var nr = r<0;
+		var ll = nl?-l:l;
+		var rr = nr?-r:r;
+		//divid
+		var d = Math.floor(ll/rr);
+		var m = Math.round(ll-rr*d);
+		// check round error
+		if(m===rr){
+			d++;
+			m = 0;
+		}
+		//negative back
+		if(nl&&!nr||!nl&&nr){
+			d = -d;
+		}
+		return [d,Math.round(l-d*r)];
+	}
+
+	function div(l,r){
+		return div2(l,r)[0];
+	}
+
+	function mod(l,r){
+		return div2(l,r)[1];
+	}
+
 	var MAX_INT32 = 0x7fffffff>>0;
 	var MIN_INT32 = 0x80000000>>0;
 
@@ -154,6 +183,10 @@
 	});
 
 	merge(exports,{
+
+		div2: div2,
+		div: div,
+		mod: mod,
 
 		MAX_INT32: MAX_INT32,
 		MIN_INT32: MIN_INT32,

@@ -69,19 +69,19 @@
 					}
 					else{
 						if(data.length<first){
-							//shift 0
+							//unshift 0
 							count_(first-data.length).foreach(function(){
-								self.data.shift(Number.NaN);
+								self.data.unshift(Number.NaN);
 							});
-							//shift data
+							//unshift data
 							array_r_(data).foreach(function(v){
-								self.data.shift(v);
+								self.data.unshift(v);
 							});
 						}
 						else if(data.length<second){
-							//shift data
+							//unshift data
 							array_r_(data,0,first).foreach(function(v){
-								self.data.shift(v);
+								self.data.unshift(v);
 							});
 							//set data
 							count_(data.length-first).foreach(function(i){
@@ -89,9 +89,9 @@
 							});
 						}
 						else{
-							//shift data
+							//unshift data
 							array_r_(data,0,first).foreach(function(v){
-								self.data.shift(v);
+								self.data.unshift(v);
 							});
 							//set data
 							count_(second-first).foreach(function(i){
