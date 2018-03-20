@@ -37,3 +37,10 @@ for(var i=0; i<1000; i++){
 	var y = dist2.sample();
 	console.error(x+","+y);
 }
+
+var Gamma = require("./k-math-special-gamma").Gamma;
+
+var K = require("../k/k-iterator");
+K.count_(30).foreach(function(i){
+	console.error(Gamma.gamma((i+1)*0.5));
+});

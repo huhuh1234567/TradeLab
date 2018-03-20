@@ -120,6 +120,27 @@
 		}
 	});
 
+	Data.zip_ = function(datas){
+		var len = datas.length;
+		var start = datas[0].offset;
+		var end = start+datas[0].data.length;
+		array_(datas,1).foreach(function(data){
+			start = Math.min(data.offset,start);
+			end = Math.max(data.offset+data.data.length,end);
+		});
+		return count_(end-start).map_(function(i){
+			var offset = start+i;
+			var rst = new Array(len);
+			count_(len).foreach(function(i){
+				rst[i] = datas[i].find(offset);
+			});
+			return {
+				$: offset,
+				_: rst
+			};
+		});
+	}
+
 	exports.Data = Data;
 
 })();

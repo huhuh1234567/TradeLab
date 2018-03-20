@@ -6,7 +6,7 @@ var iconv = require("iconv-lite");
 var cheerio = require("cheerio");
 
 var p = 0;
-var last = 143;
+var last = 1;
 
 var flag = new Date().getTime();
 

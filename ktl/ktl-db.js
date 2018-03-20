@@ -16,15 +16,15 @@
 
 	var Data = require("../ktl/ktl-data").Data;
 
-	var LEN_SLOT = 1024;
-	var LEN_SEGMENT = 8192;
-	var LEN_VAL = 8;
+	var LEN_SLOT = 4096;
+	var LEN_SEGMENT = 1024;
+	var LEN_VAL = 4;
 
 	var LEN_BUFFER = LEN_SEGMENT*LEN_VAL;
 
-	var SHIFT_SLOT = 10;
-	var SHIFT_SEGMENT = 13;
-	var SHIFT_VAL = 3;
+	var SHIFT_SLOT = 12;
+	var SHIFT_SEGMENT = 10;
+	var SHIFT_VAL = 2;
 
 	var SHIFT_BUFFER = SHIFT_SEGMENT+SHIFT_VAL;
 
@@ -141,7 +141,7 @@
 								}
 								//fill data
 								count_(len).foreach(function(i){
-									rst.data[index] = buf.readDoubleLE(i<<SHIFT_VAL);
+									rst.data[index] = buf.readFloatLE(i<<SHIFT_VAL);
 									index++;
 								});
 							}
@@ -227,7 +227,7 @@
 						if(page===undefined){
 							path = dir+"/"+tag+"_"+cluster+"_"+segment;
 							count_(LEN_SEGMENT).foreach(function(i){
-								buf.writeDoubleLE(Number.NaN,i<<SHIFT_VAL);
+								buf.writeFloatLE(Number.NaN,i<<SHIFT_VAL);
 							});
 							fd = fs.openSync(path,"w");
 							count_(LEN_SLOT).foreach(function(i){
@@ -245,7 +245,7 @@
 						}
 						//write data
 						count_(rest).foreach(function(i){
-							buf.writeDoubleLE(target.data[index],i<<SHIFT_VAL);
+							buf.writeFloatLE(target.data[index],i<<SHIFT_VAL);
 							index++;
 						});
 						var fd = fs.openSync(path,"r+");

@@ -26,6 +26,13 @@
 
 	var Data = require("../ktl/ktl-data").Data;
 
+	var CC_0 = "0".charCodeAt(0);
+	var CC_9 = "9".charCodeAt(0);
+	var CC_LA = "a".charCodeAt(0);
+	var CC_LZ = "z".charCodeAt(0);
+	var CC_UA = "A".charCodeAt(0);
+	var CC_UZ = "Z".charCodeAt(0);
+
 	var DCE_NAME_CODE = [
 		["豆一","a"],
 		["豆二","b"],
@@ -61,7 +68,7 @@
 		var my = parseInt(str.substring(0,pos));
 		var step = Math.pow(10,pos);
 		var cy = div2(curr,step);
-		var rst = cy[1]>=my?my+cy[0]:my+cy[0]-step;
+		var rst = cy[1]<=my?my+cy[0]*step:my+(cy[0]-1)*step;
 		return rst+mm;
 	}
 
@@ -82,7 +89,18 @@
 		});
 	}
 
-	function loadShiborCrawlData(path,type){
+	function loadAll(dir,load){
+
+		var rst = {};
+
+		array_(fs.readdirSync(dir)).foreach(function(fn){
+			combineData(rst,load(dir,fn));
+		});
+
+		return rst;
+	}
+
+	function loadShiborEastmoneyCrawlData(path,type){
 
 		var rst = {};
 		
@@ -94,6 +112,14 @@
 		return rst;
 	}
 
+	function loadShiborEastmoneyCrawlDataAll(path){
+		return loadAll(path,function(dir,fn){
+			var name_suffix = fn.split(".");
+			var tag_type_date = name_suffix[0].split("_");
+			return loadShiborEastmoneyCrawlData(dir+"/"+fn,tag_type_date[1]);
+		});
+	}
+
 	function loadDceFutureCrawlData(path,date){
 
 		var rst = {};
@@ -103,7 +129,7 @@
 		var lines = new FileLineIterator(path);
 		lines.foreach(function(line){
 			var vs = line.split(/\s+/);
-			var name_code = DCE_NAME_MAP.find([vs[0],""]);
+			var name_code = DCE_NAME_MAP.find([vs[0]]);
 			if(name_code!==undefined){
 				var prefix = name_code[1]+"_"+vs[1];
 				object_({
@@ -125,21 +151,12 @@
 	}
 
 	function loadDceFutureCrawlDataAll(path){
-
-		var rst = {};
-
-		array_(fs.readdirSync(path)).foreach(function(fn){
+		return loadAll(path,function(dir,fn){
 			var name_suffix = fn.split(".");
-			if(name_suffix[1]==="txt"){
-				var tag_type_date = name_suffix[0].split("_");
-				if(tag_type_date[1]==="0"){
-					var date = DF_Y_M_D.parse(tag_type_date[2]);
-					combineData(rst,loadDceFutureCrawlData(path+"/"+fn,date));
-				}
-			}
+			var tag_type_date = name_suffix[0].split("_");
+			var date = DF_Y_M_D.parse(tag_type_date[2]);
+			return loadDceFutureCrawlData(dir+"/"+fn,date);
 		});
-
-		return rst;
 	}
 
 	function loadDceOptionCrawlData(path,date){
@@ -151,7 +168,7 @@
 		var lines = new FileLineIterator(path);
 		lines.foreach(function(line){
 			var vs = line.split(/\s+/);
-			var name_code = DCE_NAME_MAP.find([vs[0],""]);
+			var name_code = DCE_NAME_MAP.find([vs[0]]);
 			if(name_code!==undefined){
 				var c = name_code[1];
 				var issues = vs[1].split("-");
@@ -179,21 +196,12 @@
 	}
 
 	function loadDceOptionCrawlDataAll(path){
-
-		var rst = {};
-
-		array_(fs.readdirSync(path)).foreach(function(fn){
+		return loadAll(path,function(dir,fn){
 			var name_suffix = fn.split(".");
-			if(name_suffix[1]==="txt"){
-				var tag_type_date = name_suffix[0].split("_");
-				if(tag_type_date[1]==="1"){
-					var date = DF_Y_M_D.parse(tag_type_date[2]);
-					combineData(rst,loadDceOptionCrawlData(path+"/"+fn,date));
-				}
-			}
+			var tag_type_date = name_suffix[0].split("_");
+			var date = DF_Y_M_D.parse(tag_type_date[2]);
+			return loadDceOptionCrawlData(dir+"/"+fn,date);
 		});
-
-		return rst;
 	}
 
 	function loadDceFutureHistoryData(path){
@@ -212,14 +220,14 @@
 				var offset = date2offset(DF_YMD.parse(vs[2]));
 				var prefix = c+"_"+mm;
 				object_({
-					open: parseFloat(vs[5].replace(/,/g,"")),
-					high: parseFloat(vs[6].replace(/,/g,"")),
-					low: parseFloat(vs[7].replace(/,/g,"")),
-					close: parseFloat(vs[8].replace(/,/g,"")),
-					settle: parseFloat(vs[9].replace(/,/g,"")),
-					vol: parseFloat(vs[12].replace(/,/g,"")),
-					oi: parseFloat(vs[14].replace(/,/g,"")),
-					amount: parseFloat(vs[13].replace(/,/g,""))
+					open: parseFloat(vs[5]),
+					high: parseFloat(vs[6]),
+					low: parseFloat(vs[7]),
+					close: parseFloat(vs[8]),
+					settle: parseFloat(vs[9]),
+					vol: parseFloat(vs[12]),
+					oi: parseFloat(vs[14]),
+					amount: parseFloat(vs[13])
 				}).foreach(function(kv){
 					upsertData(rst,prefix+"_"+kv.$,offset,kv._);
 				});
@@ -230,20 +238,9 @@
 	}
 
 	function loadDceFutureHistoryDataAll(path){
-
-		var rst = {};
-
-		array_(fs.readdirSync(path)).foreach(function(fn){
-			var name_suffix = fn.split(".");
-			if(name_suffix[1]==="csv"){
-				var tag_type_date = name_suffix[0].split("_");
-				if(tag_type_date[1]==="0"){
-					combineData(rst,loadDceFutureHistoryData(path+"/"+fn));
-				}
-			}
+		return loadAll(path,function(dir,fn){
+			return loadDceFutureHistoryData(dir+"/"+fn);
 		});
-
-		return rst;
 	}
 
 	function loadDceOptionHistoryData(path){
@@ -265,15 +262,15 @@
 				var offset = date2offset(DF_YMD.parse(vs[3]));
 				var prefix = [c,mm,cp,strike].join("_");
 				object_({
-					open: parseFloat(vs[4].replace(/,/g,"")),
-					high: parseFloat(vs[5].replace(/,/g,"")),
-					low: parseFloat(vs[6].replace(/,/g,"")),
-					close: parseFloat(vs[7].replace(/,/g,"")),
-					settle: parseFloat(vs[9].replace(/,/g,"")),
-					vol: parseFloat(vs[13].replace(/,/g,"")),
-					oi: parseFloat(vs[14].replace(/,/g,"")),
-					amount: parseFloat(vs[16].replace(/,/g,"")),
-					exercise: parseFloat(vs[17].replace(/,/g,""))
+					open: parseFloat(vs[4]),
+					high: parseFloat(vs[5]),
+					low: parseFloat(vs[6]),
+					close: parseFloat(vs[7]),
+					settle: parseFloat(vs[9]),
+					vol: parseFloat(vs[13]),
+					oi: parseFloat(vs[14]),
+					amount: parseFloat(vs[16]),
+					exercise: parseFloat(vs[17])
 				}).foreach(function(kv){
 					upsertData(rst,prefix+"_"+kv.$,offset,kv._);
 				});
@@ -284,16 +281,89 @@
 	}
 
 	function loadDceOptionHistoryDataAll(path){
+		return loadAll(path,function(dir,fn){
+			return loadDceOptionHistoryData(dir+"/"+fn);
+		});
+	}
+
+	function loadCzceFutureHistoryData(path){
 
 		var rst = {};
 
-		array_(fs.readdirSync(path)).foreach(function(fn){
-			var name_suffix = fn.split(".");
-			if(name_suffix[1]==="csv"){
-				var tag_type_date = name_suffix[0].split("_");
-				if(tag_type_date[1]==="1"){
-					var date = DF_Y_M_D.parse(tag_type_date[2]);
-					combineData(rst,loadDceOptionHistoryData(path+"/"+fn));
+		var lines = new FileLineIterator(path);
+		lines.foreach(function(line){
+			var vs = line.split("|");
+			var dateStr = vs[0].trim();
+			var dateStrStartChar = dateStr.charCodeAt(0);
+			if(dateStrStartChar>=CC_0&&dateStrStartChar<=CC_9){
+				var date = DF_Y_M_D.parse(dateStr)
+				var offset = date2offset(date);
+				var cm = vs[1].trim().toLowerCase();
+				var sep = cm.length-3;
+				var c = cm.substring(0,sep);
+				var mm = formatMatureMonth(cm.substring(sep),date.getFullYear()-2000);
+				var prefix = c+"_"+mm;
+				object_({
+					open: parseFloat(vs[3].trim().replace(/,/g,"")),
+					high: parseFloat(vs[4].trim().replace(/,/g,"")),
+					low: parseFloat(vs[5].trim().replace(/,/g,"")),
+					close: parseFloat(vs[6].trim().replace(/,/g,"")),
+					settle: parseFloat(vs[7].trim().replace(/,/g,"")),
+					vol: parseFloat(vs[10].trim().replace(/,/g,"")),
+					oi: parseFloat(vs[11].trim().replace(/,/g,"")),
+					amount: parseFloat(vs[13].trim().replace(/,/g,""))
+				}).foreach(function(kv){
+					upsertData(rst,prefix+"_"+kv.$,offset,kv._);
+				});
+			}
+		});
+
+		return rst;
+	}
+
+	function loadCzceFutureHistoryDataAll(path){
+		return loadAll(path,function(dir,fn){
+			return loadCzceFutureHistoryData(dir+"/"+fn);
+		});
+	}
+
+	function loadCzceOptionHistoryData(path){
+
+		var rst = {};
+
+		var lines = new FileLineIterator(path);
+		lines.foreach(function(line){
+			var vs = line.split("|");
+			var dateStr = vs[0].trim();
+			var dateStrStartChar = dateStr.charCodeAt(0);
+			if(dateStrStartChar>=CC_0&&dateStrStartChar<=CC_9){
+				var date = DF_Y_M_D.parse(dateStr)
+				var offset = date2offset(date);
+				var contract = vs[1].trim().toLowerCase();
+				var indexC = contract.lastIndexOf("c");
+				var indexP = contract.lastIndexOf("p");
+				var indexCP = indexC>0?indexP>0?Math.max(indexC,indexP):indexC:indexP;
+				if(indexCP>0){
+					var cm = contract.substring(0,indexCP);
+					var sep = cm.length-3;
+					var c = cm.substring(0,sep);
+					var mm = formatMatureMonth(cm.substring(sep),date.getFullYear()-2000);
+					var cp = contract.charAt(indexCP);
+					var strike = contract.substring(indexCP+1);
+					var prefix = [c,mm,cp,strike].join("_");
+					object_({
+						open: parseFloat(vs[3].trim().replace(/,/g,"")),
+						high: parseFloat(vs[4].trim().replace(/,/g,"")),
+						low: parseFloat(vs[5].trim().replace(/,/g,"")),
+						close: parseFloat(vs[6].trim().replace(/,/g,"")),
+						settle: parseFloat(vs[7].trim().replace(/,/g,"")),
+						vol: parseFloat(vs[10].trim().replace(/,/g,"")),
+						oi: parseFloat(vs[11].trim().replace(/,/g,"")),
+						amount: parseFloat(vs[13].trim().replace(/,/g,"")),
+						exercise: parseFloat(vs[16].trim().replace(/,/g,""))
+					}).foreach(function(kv){
+						upsertData(rst,prefix+"_"+kv.$,offset,kv._);
+					});
 				}
 			}
 		});
@@ -301,12 +371,68 @@
 		return rst;
 	}
 
+	function loadCzceOptionHistoryDataAll(path){
+		return loadAll(path,function(dir,fn){
+			return loadCzceOptionHistoryData(dir+"/"+fn);
+		});
+	}
+
+	function loadSseOptionWikitterData(path){
+
+		var rst = {};
+
+		var lines = new FileLineIterator(path);
+		lines.foreach(function(line){
+			var vs = line.split(",");
+			var dateStr = vs[0];
+			var dateStrStartChar = dateStr.charCodeAt(0);
+			if(dateStrStartChar>=CC_0&&dateStrStartChar<=CC_9){
+				var date = DF_YMD.parse(dateStr)
+				var offset = date2offset(date);
+				var contract = vs[2].toLowerCase();
+				var indexC = contract.indexOf("c");
+				var indexP = contract.indexOf("p");
+				var indexCP = indexC>0?indexP>0?Math.min(indexC,indexP):indexC:indexP;
+				if(indexCP>0){
+					var c = contract.substring(0,indexCP);
+					var cp = contract.charAt(indexCP);
+					var mm = contract.substring(indexCP+1,indexCP+5);
+					var strike = contract.substring(indexCP+6);
+					var mo = vs[11];
+					var rate = parseFloat(mo)/10000.0;
+					var prefix = [c,mo,mm,cp,strike].join("_");
+					object_({
+						open: parseFloat(vs[4])*rate,
+						high: parseFloat(vs[5])*rate,
+						low: parseFloat(vs[6])*rate,
+						close: parseFloat(vs[7])*rate,
+						vol: parseFloat(vs[8]),
+						oi: parseFloat(vs[9]),
+						amount: parseFloat(vs[10])*rate
+					}).foreach(function(kv){
+						upsertData(rst,prefix+"_"+kv.$,offset,kv._);
+					});
+					upsertData(rst,c+"_"+mo+"_close",offset,parseFloat(vs[14])*rate);
+				}
+			}
+		});
+
+		return rst;
+	}
+
+	function loadSseOptionWikitterDataAll(path){
+		return loadAll(path,function(dir,fn){
+			return loadSseOptionWikitterData(dir+"/"+fn);
+		});
+	}
+
 	merge(exports,{
 
 		upsertData: upsertData,
 		combineData: combineData,
 
-		loadShiborCrawlData: loadShiborCrawlData,
+		loadShiborEastmoneyCrawlData: loadShiborEastmoneyCrawlData,
+		loadShiborEastmoneyCrawlDataAll: loadShiborEastmoneyCrawlDataAll,
 
 		loadDceFutureCrawlData: loadDceFutureCrawlData,
 		loadDceFutureCrawlDataAll: loadDceFutureCrawlDataAll,
@@ -318,7 +444,16 @@
 		loadDceFutureHistoryDataAll: loadDceFutureHistoryDataAll,
 
 		loadDceOptionHistoryData: loadDceOptionHistoryData,
-		loadDceOptionHistoryDataAll: loadDceOptionHistoryDataAll
+		loadDceOptionHistoryDataAll: loadDceOptionHistoryDataAll,
+
+		loadCzceFutureHistoryData: loadCzceFutureHistoryData,
+		loadCzceFutureHistoryDataAll: loadCzceFutureHistoryDataAll,
+
+		loadCzceOptionHistoryData: loadCzceOptionHistoryData,
+		loadCzceOptionHistoryDataAll: loadCzceOptionHistoryDataAll,
+
+		loadSseOptionWikitterData: loadSseOptionWikitterData,
+		loadSseOptionWikitterDataAll: loadSseOptionWikitterDataAll
 	});
 
 })();
