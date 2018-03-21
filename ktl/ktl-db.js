@@ -5,6 +5,10 @@
 	var K = require("../k/k");
 	var merge = K.merge;
 
+	var K_UTIL = require("../k/k-util");
+	var kv = K_UTIL.kv;
+	var kvcomp = K_UTIL.kvcomp;
+
 	var K_ITERATOR = require("../k/k-iterator");
 	var count_ = K_ITERATOR.count_;
 	var array_ = K_ITERATOR.array_;
@@ -27,10 +31,6 @@
 	var SHIFT_VAL = 2;
 
 	var SHIFT_BUFFER = SHIFT_SEGMENT+SHIFT_VAL;
-
-	var $comp = function(l,r){
-		return l.$===r.$?0:l.$<r.$?-1:1;
-	};
 
 	function Database(dir,tag){
 
@@ -56,31 +56,26 @@
 
 		//load pages
 
-		var cluster2pages = new AVLTree($comp);
+		var cluster2pages = new AVLTree(kvcomp);
 
 		array_(fs.readdirSync(dir)).foreach(function(fn){
 			var vs = fn.split("_");
 			if(vs[0]===tag){
 				var cluster = parseInt(vs[1]);
 				var segment = parseInt(vs[2]);
-				var cluster_pages = cluster2pages.find({
-					$: cluster
-				});
+				var cluster_pages = cluster2pages.find(kv(cluster));
 				if(cluster_pages===undefined){
-					cluster_pages = {
-						$: cluster,
-						_: new AVLTree($comp)
-					}
+					cluster_pages = kv(cluster,new AVLTree(kvcomp));
 					cluster2pages.put(cluster_pages);
 				}
-				cluster_pages._.put({
-					$: segment,
-					_: dir+"/"+fn
-				});
+				cluster_pages._.put(kv(segment,dir+"/"+fn));
 			}
 		});
 
 		return {
+			names: function(){
+				return Object.keys(fibers);
+			},
 			load: function(name,toffset,tlength){
 				var rst = new Data();
 				var fiber = fibers[name];
@@ -94,64 +89,63 @@
 						var end = offset+length;
 
 						if(toffset!==undefined){
-							offset = Math.min(offset,toffset);
+							offset = Math.max(offset,toffset);
 						}
 
 						if(tlength!==undefined){
-							end = Math.max(end,toffset+tlength);
+							end = Math.min(end,toffset+tlength);
 							length = end-offset;
 						}
 
-						rst.offset = offset;
-						rst.data = new Array(length);
+						if(length>0){
 
-						var index = 0;
+							rst.offset = offset;
+							rst.data = new Array(length);
 
-						var cluster_pages = cluster2pages.find({
-							$: cluster
-						});
-						var pages = cluster_pages===undefined?undefined:cluster_pages._;
-							
-						var current = offset;
+							var index = 0;
 
-						var buf = new Buffer(LEN_BUFFER);
+							var cluster_pages = cluster2pages.find(kv(cluster));
+							var pages = cluster_pages===undefined?undefined:cluster_pages._;
 
-						var rest;
-						while((rest=offset+length-current)>0){
-							//truncate to within segment
-							var segment = current>>SHIFT_SEGMENT;
-							var start = current-(segment<<SHIFT_SEGMENT);
-							rest = Math.min(rest,LEN_SEGMENT-start);
-							//step to next
-							current += rest;
-							//int segment offset
-							var len = 0;
-							//find file
-							var page = pages===undefined?undefined:pages.find({
-								$: segment
-							});
-							if(page!==undefined){
-								//read to buffer
-								var fd = fs.openSync(page._,"r");
-								len = fs.readSync(fd,buf,0,rest<<SHIFT_VAL,(slot<<SHIFT_BUFFER)+(start<<SHIFT_VAL))>>SHIFT_VAL;
-								fs.closeSync(fd);
-								//truncate to below rest
-								if(len>rest){
-									len = rest;
+							var current = offset;
+
+							var buf = new Buffer(LEN_BUFFER);
+
+							var rest;
+							while((rest=offset+length-current)>0){
+								//truncate to within segment
+								var segment = current>>SHIFT_SEGMENT;
+								var start = current-(segment<<SHIFT_SEGMENT);
+								rest = Math.min(rest,LEN_SEGMENT-start);
+								//step to next
+								current += rest;
+								//int segment offset
+								var len = 0;
+								//find file
+								var page = pages===undefined?undefined:pages.find(kv(segment));
+								if(page!==undefined){
+									//read to buffer
+									var fd = fs.openSync(page._,"r");
+									len = fs.readSync(fd,buf,0,rest<<SHIFT_VAL,(slot<<SHIFT_BUFFER)+(start<<SHIFT_VAL))>>SHIFT_VAL;
+									fs.closeSync(fd);
+									//truncate to below rest
+									if(len>rest){
+										len = rest;
+									}
+									//fill data
+									count_(len).foreach(function(i){
+										rst.data[index] = buf.readFloatLE(i<<SHIFT_VAL);
+										index++;
+									});
 								}
-								//fill data
-								count_(len).foreach(function(i){
-									rst.data[index] = buf.readFloatLE(i<<SHIFT_VAL);
-									index++;
-								});
-							}
-							//pad NaN
-							rest -= len;
-							if(rest>0){
-								count_(rest).foreach(function(i){
-									rst.data[index] = Number.NaN;
-									index++;
-								});
+								//pad NaN
+								rest -= len;
+								if(rest>0){
+									count_(rest).foreach(function(i){
+										rst.data[index] = Number.NaN;
+										index++;
+									});
+								}
 							}
 						}
 					}
@@ -189,24 +183,19 @@
 				}
 				//save data
 				if(target.data.length>0){
-	
+
 					offset = target.offset;
 					length = target.data.length;
 
 					var index = 0;
 
-					var cluster_pages = cluster2pages.find({
-						$: cluster
-					});
+					var cluster_pages = cluster2pages.find(kv(cluster));
 					if(cluster_pages===undefined){
-						cluster_pages = {
-							$: cluster,
-							_: new AVLTree($comp)
-						};
+						cluster_pages = kv(cluster,new AVLTree(kvcomp));
 						cluster2pages.put(cluster_pages);
 					}
 					var pages = cluster_pages._;
-						
+
 					var current = offset;
 
 					var buf = new Buffer(LEN_BUFFER);
@@ -221,9 +210,7 @@
 						current += rest;
 						//find file
 						var path;
-						var page = pages.find({
-							$: segment
-						});
+						var page = pages.find(kv(segment));
 						if(page===undefined){
 							path = dir+"/"+tag+"_"+cluster+"_"+segment;
 							count_(LEN_SEGMENT).foreach(function(i){
@@ -234,10 +221,7 @@
 								fs.writeSync(fd,buf,0,LEN_BUFFER,i<<SHIFT_BUFFER);
 							});
 							fs.closeSync(fd);
-							page = {
-								$: segment,
-								_: path
-							};
+							page = kv(segment,path);
 							pages.put(page);
 						}
 						else{

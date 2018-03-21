@@ -60,12 +60,9 @@
 		}
 	}
 
-	function Tree_find$(tree,value,block){
-	}
-
 	merge(Tree.prototype,{
 		___comp: function(l,r){
-			return l===r?0:l<r?-1:1;
+			return l<r?-1:l===r?0:1;
 		},
 		___first$: function(){
 			var $ = this.___root$;

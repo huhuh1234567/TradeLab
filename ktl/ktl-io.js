@@ -6,6 +6,8 @@
 	var merge = K.merge;
 
 	var K_UTIL = require("../k/k-util");
+	var kv = K_UTIL.kv;
+	var kvcomp = K_UTIL.kvcomp;
 	var object$ = K_UTIL.object$;
 	var upsert$ = K_UTIL.upsert$;
 
@@ -33,7 +35,8 @@
 	var CC_UA = "A".charCodeAt(0);
 	var CC_UZ = "Z".charCodeAt(0);
 
-	var DCE_NAME_CODE = [
+	var name2code = new AVLTree(kvcomp);
+	array_([
 		["豆一","a"],
 		["豆二","b"],
 		["胶合板","bb"],
@@ -50,13 +53,8 @@
 		["聚丙烯","pp"],
 		["聚氯乙烯","v"],
 		["豆油","y"],
-	];
-
-	var DCE_NAME_MAP = new AVLTree(function(l,r){
-		return l[0]===r[0]?0:l[0]<r[0]?-1:1;
-	});
-	array_(DCE_NAME_CODE).foreach(function(v){
-		DCE_NAME_MAP.put(v);
+	]).foreach(function(v){
+		name2code.put(kv(v[0],v[1]));
 	});
 
 	var DF_Y_M_D = new DateFormat("yyyy-MM-dd");
@@ -103,7 +101,7 @@
 	function loadShiborEastmoneyCrawlData(path,type){
 
 		var rst = {};
-		
+
 		new FileLineIterator(path).foreach(function(line){
 			var vs = line.split("|");
 			upsertData(rst,"shibor_"+type,date2offset(DF_Y_M_D.parse(vs[0])),parseFloat(vs[1])*0.01);
@@ -129,9 +127,9 @@
 		var lines = new FileLineIterator(path);
 		lines.foreach(function(line){
 			var vs = line.split(/\s+/);
-			var name_code = DCE_NAME_MAP.find([vs[0]]);
+			var name_code = name2code.find(kv(vs[0]));
 			if(name_code!==undefined){
-				var prefix = name_code[1]+"_"+vs[1];
+				var prefix = name_code._+"_"+formatMatureMonth(vs[1],date.getFullYear());
 				object_({
 					open: parseFloat(vs[2].replace(/,/g,"")),
 					high: parseFloat(vs[3].replace(/,/g,"")),
@@ -168,11 +166,11 @@
 		var lines = new FileLineIterator(path);
 		lines.foreach(function(line){
 			var vs = line.split(/\s+/);
-			var name_code = DCE_NAME_MAP.find([vs[0]]);
+			var name_code = name2code.find(kv(vs[0]));
 			if(name_code!==undefined){
-				var c = name_code[1];
+				var c = name_code._;
 				var issues = vs[1].split("-");
-				var mm = issues[0].substring(c.length);
+				var mm = formatMatureMonth(issues[0].substring(c.length),date.getFullYear());
 				var cp = issues[1].toLowerCase();
 				var strike = issues[2];
 				var prefix = [c,mm,cp,strike].join("_");
@@ -213,11 +211,12 @@
 			var vs = line.split(",");
 			var rn = parseInt(vs[0]);
 			if(!isNaN(rn)){
+				var date = DF_YMD.parse(vs[2]);
 				var cm = vs[1];
 				var sep = cm.length-4;
 				var c = cm.substring(0,sep);
-				var mm = cm.substring(sep);
-				var offset = date2offset(DF_YMD.parse(vs[2]));
+				var mm = formatMatureMonth(cm.substring(sep),date.getFullYear());
+				var offset = date2offset(date);
 				var prefix = c+"_"+mm;
 				object_({
 					open: parseFloat(vs[5]),
@@ -252,14 +251,15 @@
 			var vs = line.split(",");
 			var rn = parseInt(vs[0]);
 			if(!isNaN(rn)){
+				var date = DF_YMD.parse(vs[3]);
 				var issues = vs[2].split("-");
 				var cm = issues[0];
 				var sep = cm.length-4;
 				var c = cm.substring(0,sep);
-				var mm = cm.substring(sep);
+				var mm = formatMatureMonth(cm.substring(sep),date.getFullYear());
 				var cp = issues[1].toLowerCase();
 				var strike = issues[2];
-				var offset = date2offset(DF_YMD.parse(vs[3]));
+				var offset = date2offset(date);
 				var prefix = [c,mm,cp,strike].join("_");
 				object_({
 					open: parseFloat(vs[4]),
@@ -301,7 +301,7 @@
 				var cm = vs[1].trim().toLowerCase();
 				var sep = cm.length-3;
 				var c = cm.substring(0,sep);
-				var mm = formatMatureMonth(cm.substring(sep),date.getFullYear()-2000);
+				var mm = formatMatureMonth(cm.substring(sep),date.getFullYear());
 				var prefix = c+"_"+mm;
 				object_({
 					open: parseFloat(vs[3].trim().replace(/,/g,"")),
@@ -347,7 +347,7 @@
 					var cm = contract.substring(0,indexCP);
 					var sep = cm.length-3;
 					var c = cm.substring(0,sep);
-					var mm = formatMatureMonth(cm.substring(sep),date.getFullYear()-2000);
+					var mm = formatMatureMonth(cm.substring(sep),date.getFullYear());
 					var cp = contract.charAt(indexCP);
 					var strike = contract.substring(indexCP+1);
 					var prefix = [c,mm,cp,strike].join("_");
@@ -396,7 +396,7 @@
 				if(indexCP>0){
 					var c = contract.substring(0,indexCP);
 					var cp = contract.charAt(indexCP);
-					var mm = contract.substring(indexCP+1,indexCP+5);
+					var mm = formatMatureMonth(contract.substring(indexCP+1,indexCP+5),date.getFullYear());
 					var strike = contract.substring(indexCP+6);
 					var mo = vs[11];
 					var rate = parseFloat(mo)/10000.0;
@@ -430,6 +430,10 @@
 
 		upsertData: upsertData,
 		combineData: combineData,
+
+		loadAll: loadAll,
+
+		formatMatureMonth: formatMatureMonth,
 
 		loadShiborEastmoneyCrawlData: loadShiborEastmoneyCrawlData,
 		loadShiborEastmoneyCrawlDataAll: loadShiborEastmoneyCrawlDataAll,

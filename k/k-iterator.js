@@ -3,11 +3,28 @@
 	var K = require("./k");
 	var merge = K.merge;
 
+	var K_UTIL = require("../k/k-util");
+	var kv = K_UTIL.kv;
+
 	function Iterator(){
 
 	}
 
 	merge(Iterator.prototype,{
+		toArray: function(){
+			var rst = [];
+			this.foreach(function(v){
+				rst.push(v);
+			});
+			return rst;
+		},
+		toObject: function(){
+			var rst = {};
+			this.foreach(function(kv){
+				rst[kv.$] = kv._;
+			});
+			return rst;
+		},
 		foreach: function(block){
 			var end = false;
 			var v = undefined;
@@ -153,10 +170,7 @@
 
 	function object_(obj){
 		return array_(Object.keys(obj)).map_(function(k){
-			return {
-				$: k,
-				_: obj[k]
-			};
+			return kv(k,obj[k]);
 		});
 	}
 

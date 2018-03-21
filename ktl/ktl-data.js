@@ -5,6 +5,9 @@
 	var K = require("../k/k");
 	var merge = K.merge;
 
+	var K_UTIL = require("../k/k-util");
+	var kv = K_UTIL.kv;
+
 	var K_ITERATOR = require("../k/k-iterator");
 	var count_ = K_ITERATOR.count_;
 	var array_ = K_ITERATOR.array_;
@@ -112,10 +115,7 @@
 			var self = this;
 			return count_(self.data.length).map_(function(i){
 				var v = self.data[i];
-				return {
-					$: self.offset+i,
-					_: v
-				};
+				return kv(self.offset+i,v);
 			});
 		}
 	});
@@ -134,10 +134,7 @@
 			count_(len).foreach(function(i){
 				rst[i] = datas[i].find(offset);
 			});
-			return {
-				$: offset,
-				_: rst
-			};
+			return kv(offset,rst);
 		});
 	}
 

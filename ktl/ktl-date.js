@@ -3,12 +3,14 @@
 	var K = require("../k/k");
 	var merge = K.merge;
 
+	var K_UTIL = require("../k/k-util");
+	var kv = K_UTIL.kv;
+
 	var K_ITERATOR = require("../k/k-iterator");
 	var array_ = K_ITERATOR.array_;
 	var object_ = K_ITERATOR.object_;
 
-	var K_AVLTREE = require("../k/k-avltree");
-	var AVLTree = K_AVLTREE.AVLTree;
+	var AVLTree = require("../k/k-avltree").AVLTree;
 
 	var KTL = require("./ktl");
 	var MS_OF_DAY = KTL.MS_OF_DAY;
@@ -130,10 +132,7 @@
 		object_(processors).foreach(function(tag_processor){
 			var ti = pattern.indexOf(tag_processor.$);
 			if(ti>=0){
-				splits.push({
-					$: ti,
-					_: tag_processor._
-				});
+				splits.push(kv(ti,tag_processor._));
 			}
 		});
 		splits.sort(function(l,r){
