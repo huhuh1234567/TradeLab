@@ -171,7 +171,6 @@
 			return l===r?0:l<r?-1:1;
 		},
 		___insert$: function(parent$,value,diff){
-			this.size++;
 			var $ = new AVLTreeNode(value);
 			if(parent$===null){
 				//root node
@@ -277,7 +276,6 @@
 			if(parent$!==null){
 				AVLTree_rebalance(this,parent$);
 			}
-			this.size--;
 		}
 	});
 

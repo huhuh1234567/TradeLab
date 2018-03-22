@@ -1,8 +1,9 @@
-global.merge = require("../k/k").merge;
+var K = require("../k/k");
+global.merge = K.merge;
 
 merge(global,require("../k/k-iterator"));
-merge(global,require("./ktl-db"));
-merge(global,require("./ktl-io"));
+merge(global,require("../ktl/ktl-database"));
+merge(global,require("./ktl-datasource"));
 
 var testdb = new Database("./test/db","test");
 

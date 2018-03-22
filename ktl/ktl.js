@@ -5,17 +5,18 @@
 
 	var MS_OF_DAY = 1000*60*60*24;
 
-	var DAY_OF_YEAR = 365;
+	var DAY_OF_YEAR = 252;
 
 	function dtm(day,mday){
-		return Math.round((mday.getTime()-day.getTime())/MS_OF_DAY)>>0
+		return day instanceof Date?Math.round((mday.getTime()-day.getTime())/MS_OF_DAY)>>0:mday-day;
+		return Math.round(diff/MS_OF_DAY)>>0
 	}
 
 	function ytm(day,mday){
-		return dtm(day,mday)/DAY_OF_YEAR;
+		return dtm(day,mday)/365;
 	}
 
-	function formatNumber(num,nop){
+	function print(num,nop){
 		var current;
 		var part1 = "";
 		var part2 = "";
@@ -78,7 +79,7 @@
 		DAY_OF_YEAR: DAY_OF_YEAR,
 		dtm: dtm,
 		ytm: ytm,
-		formatNumber: formatNumber
+		print: print
 	});
 
 })();

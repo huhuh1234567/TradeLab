@@ -1,4 +1,5 @@
-global.merge = require("./k").merge;
+var K = require("./k");
+global.merge = K.merge;
 
 merge(global,require("./k-iterator"));
 merge(global,require("./k-dlink"));

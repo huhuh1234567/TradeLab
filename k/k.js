@@ -2,17 +2,24 @@
 
 	function merge(base,other){
 		for(p in other){
-			var v = other[p];
-			if(v!==undefined){
-				base[p] = v;
-			}
-			else{
-				delete base[p];
-			}
+			base[p] = other[p];
 		}
 		return base;
 	}
 
-	exports.merge = merge;
+	function kv$(k,v){
+		var r = {
+			$: k
+		};
+		if(v!==undefined){
+			r._ = v;
+		}
+		return r;
+	}
+
+	merge(exports,{
+		merge: merge,
+		kv$: kv$
+	});
 
 })();

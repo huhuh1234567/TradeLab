@@ -4,18 +4,14 @@
 
 	var K = require("../k/k");
 	var merge = K.merge;
+	var kv$ = K.kv$;
 
 	var K_UTIL = require("../k/k-util");
-	var kv = K_UTIL.kv;
-	var kvcomp = K_UTIL.kvcomp;
-	var object$ = K_UTIL.object$;
 	var upsert$ = K_UTIL.upsert$;
 
 	var K_ITERATOR = require("../k/k-iterator");
 	var object_ = K_ITERATOR.object_;
 	var array_ = K_ITERATOR.array_;
-
-	var AVLTree = require("../k/k-avltree").AVLTree;
 
 	var FileLineIterator = require("../k/k-file-line-iterator").FileLineIterator;
 
@@ -35,27 +31,24 @@
 	var CC_UA = "A".charCodeAt(0);
 	var CC_UZ = "Z".charCodeAt(0);
 
-	var name2code = new AVLTree(kvcomp);
-	array_([
-		["豆一","a"],
-		["豆二","b"],
-		["胶合板","bb"],
-		["玉米","c"],
-		["玉米淀粉","cs"],
-		["纤维板","fb"],
-		["铁矿石","i"],
-		["焦炭","j"],
-		["鸡蛋","jd"],
-		["焦煤","jm"],
-		["聚乙烯","l"],
-		["豆粕","m"],
-		["棕榈油","p"],
-		["聚丙烯","pp"],
-		["聚氯乙烯","v"],
-		["豆油","y"],
-	]).foreach(function(v){
-		name2code.put(kv(v[0],v[1]));
-	});
+	var name2code = {
+		"豆一": "a",
+		"豆二": "b",
+		"胶合板": "bb",
+		"玉米": "c",
+		"玉米淀粉": "cs",
+		"纤维板": "fb",
+		"铁矿石": "i",
+		"焦炭": "j",
+		"鸡蛋": "jd",
+		"焦煤": "jm",
+		"聚乙烯": "l",
+		"豆粕": "m",
+		"棕榈油": "p",
+		"聚丙烯": "pp",
+		"聚氯乙烯": "v",
+		"豆油": "y"
+	};
 
 	var DF_Y_M_D = new DateFormat("yyyy-MM-dd");
 	var DF_YMD = new DateFormat("yyyyMMdd");
@@ -83,7 +76,7 @@
 			var d = upsert$(dst,kv.$,function(){
 				return new Data();
 			});
-			d.update(kv._.offset,kv._.data);
+			d.update(kv._.offset,kv._.vals);
 		});
 	}
 
@@ -127,9 +120,9 @@
 		var lines = new FileLineIterator(path);
 		lines.foreach(function(line){
 			var vs = line.split(/\s+/);
-			var name_code = name2code.find(kv(vs[0]));
-			if(name_code!==undefined){
-				var prefix = name_code._+"_"+formatMatureMonth(vs[1],date.getFullYear());
+			var c = name2code[vs[0]];
+			if(c!==undefined){
+				var prefix = c+"_"+formatMatureMonth(vs[1],date.getFullYear());
 				object_({
 					open: parseFloat(vs[2].replace(/,/g,"")),
 					high: parseFloat(vs[3].replace(/,/g,"")),
@@ -166,9 +159,8 @@
 		var lines = new FileLineIterator(path);
 		lines.foreach(function(line){
 			var vs = line.split(/\s+/);
-			var name_code = name2code.find(kv(vs[0]));
-			if(name_code!==undefined){
-				var c = name_code._;
+			var c = name2code[vs[0]];
+			if(c!==undefined){
 				var issues = vs[1].split("-");
 				var mm = formatMatureMonth(issues[0].substring(c.length),date.getFullYear());
 				var cp = issues[1].toLowerCase();

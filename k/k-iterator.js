@@ -2,9 +2,7 @@
 
 	var K = require("./k");
 	var merge = K.merge;
-
-	var K_UTIL = require("../k/k-util");
-	var kv = K_UTIL.kv;
+	var kv$ = K.kv$;
 
 	function Iterator(){
 
@@ -108,6 +106,9 @@
 							}
 							if(buffer!==undefined){
 								v = buffer.next();
+								if(v===undefined){
+									buffer = undefined;
+								}
 							}
 						}
 						return v;
@@ -170,7 +171,7 @@
 
 	function object_(obj){
 		return array_(Object.keys(obj)).map_(function(k){
-			return kv(k,obj[k]);
+			return kv$(k,obj[k]);
 		});
 	}
 

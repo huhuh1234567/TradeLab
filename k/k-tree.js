@@ -124,6 +124,7 @@
 					$._ = value;
 				}
 				else{
+					tree.size++;
 					tree.___insert$(parent$,value,diff);
 				}
 			});
@@ -137,6 +138,7 @@
 				else{
 					var v = $._;
 					tree.___remove$($);
+					tree.size--;
 					return v;
 				}
 			});

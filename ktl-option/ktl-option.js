@@ -6,6 +6,14 @@
 	var KTL = require("../ktl/ktl");
 	var ytm = KTL.ytm;
 
+	function moneyness(k,s,cp){
+		return cp*(s-k);
+	}
+
+	function findNearestStrike(s,step){
+		return Math.round(s/step)*step;
+	}
+
 	function ___stockNoArbitrageRate(pc,pp,s,k,ytm){
 		return -Math.log((s-pc+pp)/k)/ytm;
 	}
@@ -23,6 +31,10 @@
 	}
 
 	merge(exports,{
+
+		moneyness: moneyness,
+		findNearestStrike: findNearestStrike,
+
 		___stockNoArbitrageRate: ___stockNoArbitrageRate,
 		___futureNoArbitrageRate: ___futureNoArbitrageRate,
 		stockNoArbitrageRate: stockNoArbitrageRate,

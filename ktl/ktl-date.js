@@ -2,9 +2,7 @@
 
 	var K = require("../k/k");
 	var merge = K.merge;
-
-	var K_UTIL = require("../k/k-util");
-	var kv = K_UTIL.kv;
+	var kv$ = K.kv$;
 
 	var K_ITERATOR = require("../k/k-iterator");
 	var array_ = K_ITERATOR.array_;
@@ -132,7 +130,7 @@
 		object_(processors).foreach(function(tag_processor){
 			var ti = pattern.indexOf(tag_processor.$);
 			if(ti>=0){
-				splits.push(kv(ti,tag_processor._));
+				splits.push(kv$(ti,tag_processor._));
 			}
 		});
 		splits.sort(function(l,r){
@@ -167,7 +165,7 @@
 		parse: function(str,offset,date){
 			if(offset===undefined){
 				offset = 0;
-				date = new Date(0);
+				date = new Date(TIMEZONE_OFFSET);
 			}
 			else if(date===undefined){
 				if(offset instanceof Date){
@@ -203,6 +201,8 @@
 	}
 
 	merge(exports,{
+
+		TIMEZONE_OFFSET: TIMEZONE_OFFSET,
 
 		DateFormat: DateFormat,
 

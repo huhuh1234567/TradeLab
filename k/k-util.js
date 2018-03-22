@@ -3,17 +3,7 @@
 	var K = require("./k");
 	var merge = K.merge;
 
-	function kv(k,v){
-		var r = {
-			$: k
-		};
-		if(v!==undefined){
-			r._ = v;
-		}
-		return r;
-	}
-
-	function kvcomp(l,r){
+	function comp$(l,r){
 		return l.$<r.$?-1:l.$===r.$?0:1;
 	};
 
@@ -61,8 +51,7 @@
 
 	merge(exports,{
 
-		kv: kv,
-		kvcomp: kvcomp,
+		comp$: comp$,
 
 		insure: insure,
 
