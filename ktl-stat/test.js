@@ -3,6 +3,7 @@ global.merge = K.merge;
 
 merge(global,require("../k/k-iterator"));
 merge(global,require("../ktl/ktl"));
+merge(global,require("../k/k-date"));
 merge(global,require("../ktl/ktl-date"));
 merge(global,require("../ktl/ktl-database"));
 merge(global,require("../ktl/ktl-data"));

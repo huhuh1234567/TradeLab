@@ -12,9 +12,11 @@
 	var K_UTIL = require("../k/k-util");
 	var Set = K_UTIL.Set;
 
+	var K_DATE = require("../k/k-date");
+	var TIMEZONE_OFFSET = K_DATE.TIMEZONE_OFFSET;
+	var DateFormat = K_DATE.DateFormat;
+
 	var KTL_DATE = require("../ktl/ktl-date");
-	var TIMEZONE_OFFSET = KTL_DATE.TIMEZONE_OFFSET;
-	var DateFormat = KTL_DATE.DateFormat;
 	var date2offset = KTL_DATE.date2offset;
 
 	var DF_YM = new DateFormat("yyyyMM");

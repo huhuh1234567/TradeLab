@@ -1,30 +1,13 @@
 
-var http = require("http");
 var fs = require("fs");
 
-function safeclose(fd){
-	if(fd!==0){
-		try{
-			fs.closeSync(fd);
-		}
-		catch(e){
-			console.error(e);
-		}
-		fd = 0;
-	}
-}
+var K_HTTPCLIENT = require("../k/k-httpclient");
+var request = K_HTTPCLIENT.request;
 
-function withfd(fd,op){
-	try{
-		op(fd);
-		return true;
-	}
-	catch(e){
-		console.error(e);
-		safeclose(fd);
-		return false;
-	}
-}
+var K_DATE = require("../k/k-date");
+var DateFormat = K_DATE.DateFormat;
+
+var df = new DateFormat("yyyy-MM-dd");
 
 var variety = "all";
 var type = 1;
@@ -95,101 +78,48 @@ var index = 0;
 
 			console.error(ymd+" started");
 
-			var year = parseInt(ymd.substring(0,4));
-			var month = parseInt(ymd.substring(5,7));
-			var day = parseInt(ymd.substring(8,10));
+			var date = df.parse(ymd);
 
-			var outfile = 0;
-	
-			var request = http.request({
-				host: "www.dce.com.cn",
-				path: "/publicweb/quotesdata/exportDayQuotesChData.html",
-				method: "POST",
-				headers: {
-					"Content-Type": "application/x-www-form-urlencoded"
-				}
-			},function(response){
-				
-				var status = response.statusCode;
-		
-				if(status===200){
-		
-					outfile = fs.openSync(variety+"_"+type+"_"+ymd+".txt","w");
-
-					response.on("data",(chunck)=>{
-						if(chunck){
-							if(!withfd(outfile,(fd)=>{
-								fs.writeSync(fd,chunck);
-							})){
-								console.error("date "+ymd+" failed!");
-							}
-						}
-					});
-			
-					response.on("end",(chunck)=>{
-						var r = true;
-						if(chunck){
-							r = withfd(outfile,(fd)=>{
-								fs.writeSync(fd,chunck);
-							});
-						}
-						safeclose(outfile);
-						if(r){
-							console.error("date "+ymd+" succeed!");
-							run();
-						}
-						else{
-							console.error("date "+ymd+" failed!");
-							run();
-						}
-					});
-		
-					response.setTimeout(15*1000,()=>{
-						request.abort();
-						console.error("response timeout");
-						console.error("date "+ymd+" failed!");
-						run();
-					})
-		
-					response.on("error",(e)=>{
-						safeclose(outfile);
-						console.error(e);
-						console.error("date "+ymd+" failed!");
-						run();
-					});
-				}
-				else{
-					safeclose(outfile);
-					console.error("HTTP STATUS "+status);
-					console.error("date "+ymd+" failed!");
-					run();
-				}
-			});
-		
-			request.setTimeout(15*1000,()=>{
-				request.abort();
-				console.error("request timeout");
-				console.error("date "+ymd+" failed!");
-				run();
-			});
-
-			request.on("error",(e)=>{
-				safeclose(outfile);
-				console.error(e);
-				console.error("date "+ymd+" failed!");
-				run();
-			});
-		
 			var datas = [
 				"dayQuotes.variety="+variety,
 				"dayQuotes.trade_type="+type,
-				"year="+year,
-				"month="+(month-1),
-				"day="+day,
+				"year="+date.getFullYear(),
+				"month="+date.getMonth(),
+				"day="+date.getDate(),
 				"exportFlag=txt"
 			];
-			request.write(datas.join("&"));
-			request.end();
+
+			request("www.dce.com.cn","POST","/publicweb/quotesdata/exportDayQuotesChData.html",{
+				"Content-Type": "application/x-www-form-urlencoded"
+			},datas.join("&"),function(error,buf){
+				if(!error){
+					var fd = 0;
+					try{
+						fd = fs.openSync(variety+"_"+type+"_"+ymd+".txt","w");
+						fs.writeSync(fd,buf);
+					}
+					catch(e){
+						error = e.toString();
+					}
+					if(fd!==0){
+						try{
+							fs.closeSync(fd);
+						}
+						catch(e){
+							error = !error?e.toString():error+"\n"+e.toString();
+						}
+						fd = 0;
+					}
+				}
+				if(!error){
+					console.error("date "+ymd+" succeed!");
+				}
+				else{
+					console.error("date "+ymd+" failed!");
+					console.error(error);
+				}
+				run();
+			},15*1000);
 		},timeout);
 	}
 })();

@@ -4,6 +4,7 @@
 	var merge = K.merge;
 
 	var KTL = require("../ktl/ktl");
+	var DAY_OF_YEAR = KTL.DAY_OF_YEAR;
 	var ytm = KTL.ytm;
 
 	var EPSILON = 1e-9;
@@ -66,8 +67,8 @@
 		},
 		___theta: function(f, k, r, sigma, ytm, d){
 			if(f > 0 && sigma > 0){
-				var ddoy = -0.005 / DOY()
-				return (this.___price(f, k, r, sigma, ytm + ddoy, d) - this.___price(f - 0.005, k, r, sigma, ytm - ddoy, d)) * 100;
+				var ddoy = -0.005 / DAY_OF_YEAR;
+				return (this.___price(f, k, r, sigma, ytm + ddoy, d) - this.___price(f, k, r, sigma, ytm - ddoy, d)) * 100;
 			}
 			else{
 				return 0.0;

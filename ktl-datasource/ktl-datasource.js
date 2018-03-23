@@ -18,8 +18,10 @@
 	var K_MATH = require("../k-math/k-math");
 	var div2 = K_MATH.div2;
 
+	var K_DATE = require("../k/k-date");
+	var DateFormat = K_DATE.DateFormat;
+
 	var KTL_DATE = require("../ktl/ktl-date");
-	var DateFormat = KTL_DATE.DateFormat;
 	var date2offset = KTL_DATE.date2offset;
 
 	var Data = require("../ktl/ktl-data").Data;

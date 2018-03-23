@@ -16,8 +16,10 @@ var gamma = model.gamma(s,k,r,iv,day,mday,d);
 
 console.error("iv="+iv+", pp="+pp+", delta="+delta+", gamma="+gamma);
 
+var K_DATE = require("../k/k-date");
+var DateFormat = K_DATE.DateFormat;
+
 var KTL_DATE = require("../ktl/ktl-date");
-var DateFormat = KTL_DATE.DateFormat;
 var date2offset = KTL_DATE.date2offset;
 var offset2date = KTL_DATE.offset2date;
 
