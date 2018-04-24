@@ -280,6 +280,101 @@
 		});
 	}
 
+	function loadCzceFutureCrawlData(path,date){
+
+		var rst = {};
+
+		var offset = date2offset(date);
+
+		var lines = new FileLineIterator(path);
+		lines.foreach(function(line){
+			var vs = line.split("|");
+			var cm = vs[0].trim().toLowerCase();
+			var cmsc = cm.charCodeAt(0);
+			if(cmsc>=CC_LA&&cmsc<=CC_LZ){
+				var sep = cm.length-3;
+				var c = cm.substring(0,sep);
+				var mm = cm.substring(sep);
+				var prefix = c+"_"+formatMatureMonth(mm,date.getFullYear());
+				object_({
+					open: parseFloat(vs[2].trim().replace(/,/g,"")),
+					high: parseFloat(vs[3].trim().replace(/,/g,"")),
+					low: parseFloat(vs[4].trim().replace(/,/g,"")),
+					close: parseFloat(vs[5].trim().replace(/,/g,"")),
+					settle: parseFloat(vs[6].trim().replace(/,/g,"")),
+					vol: parseFloat(vs[9].trim().replace(/,/g,"")),
+					oi: parseFloat(vs[10].trim().replace(/,/g,"")),
+					amount: parseFloat(vs[12].trim().replace(/,/g,""))
+				}).foreach(function(kv){
+					upsertData(rst,prefix+"_"+kv.$,offset,kv._);
+				});
+			}
+		});
+
+		return rst;
+	}
+
+	function loadCzceFutureCrawlDataAll(path){
+		return loadAll(path,function(dir,fn){
+			var name_suffix = fn.split(".");
+			var tag_type_date = name_suffix[0].split("_");
+			var date = DF_Y_M_D.parse(tag_type_date[2]);
+			return loadCzceFutureCrawlData(dir+"/"+fn,date);
+		});
+	}
+
+	function loadCzceOptionCrawlData(path,date){
+
+		var rst = {};
+
+		var offset = date2offset(date);
+
+		var lines = new FileLineIterator(path);
+		lines.foreach(function(line){
+			var vs = line.split("|");
+			var contract = vs[0].trim().toLowerCase();
+			var contractsc = contract.charCodeAt(0);
+			if(contractsc>=CC_LA&&contractsc<=CC_LZ){
+				var indexC = contract.lastIndexOf("c");
+				var indexP = contract.lastIndexOf("p");
+				var indexCP = indexC>0?indexP>0?Math.max(indexC,indexP):indexC:indexP;
+				if(indexCP>0){
+					var cm = contract.substring(0,indexCP);
+					var sep = cm.length-3;
+					var c = cm.substring(0,sep);
+					var mm = formatMatureMonth(cm.substring(sep),date.getFullYear());
+					var cp = contract.charAt(indexCP);
+					var strike = contract.substring(indexCP+1);
+					var prefix = [c,mm,cp,strike].join("_");
+					object_({
+						open: parseFloat(vs[2].trim().replace(/,/g,"")),
+						high: parseFloat(vs[3].trim().replace(/,/g,"")),
+						low: parseFloat(vs[4].trim().replace(/,/g,"")),
+						close: parseFloat(vs[5].trim().replace(/,/g,"")),
+						settle: parseFloat(vs[6].trim().replace(/,/g,"")),
+						vol: parseFloat(vs[9].trim().replace(/,/g,"")),
+						oi: parseFloat(vs[10].trim().replace(/,/g,"")),
+						amount: parseFloat(vs[12].trim().replace(/,/g,"")),
+						exercise: parseFloat(vs[15].trim().replace(/,/g,""))
+					}).foreach(function(kv){
+						upsertData(rst,prefix+"_"+kv.$,offset,kv._);
+					});
+				}
+			}
+		});
+
+		return rst;
+	}
+
+	function loadCzceOptionCrawlDataAll(path){
+		return loadAll(path,function(dir,fn){
+			var name_suffix = fn.split(".");
+			var tag_type_date = name_suffix[0].split("_");
+			var date = DF_Y_M_D.parse(tag_type_date[2]);
+			return loadCzceOptionCrawlData(dir+"/"+fn,date);
+		});
+	}
+
 	function loadCzceFutureHistoryData(path){
 
 		var rst = {};
@@ -443,6 +538,12 @@
 
 		loadDceOptionHistoryData: loadDceOptionHistoryData,
 		loadDceOptionHistoryDataAll: loadDceOptionHistoryDataAll,
+
+		loadCzceFutureCrawlData: loadCzceFutureCrawlData,
+		loadCzceFutureCrawlDataAll: loadCzceFutureCrawlDataAll,
+
+		loadCzceOptionCrawlData: loadCzceOptionCrawlData,
+		loadCzceOptionCrawlDataAll: loadCzceOptionCrawlDataAll,
 
 		loadCzceFutureHistoryData: loadCzceFutureHistoryData,
 		loadCzceFutureHistoryDataAll: loadCzceFutureHistoryDataAll,

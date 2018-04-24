@@ -36,7 +36,7 @@ var volatilityCone = KTL_MODEL_VOLATILITY.volatilityCone;
 
 var b76m = new Black76Model();
 
-var testdb = new Database("./test/db","test");
+var db2 = new Database("./test/db2","option");
 
 var df = new DateFormat("yyyyMM");
 
@@ -60,17 +60,17 @@ var PROFILE_M = {
 	mdelay: 22
 };
 
-var profile = PROFILE_SR;
+var profile = PROFILE_M;
 
-var shibor = testdb.load("shibor_on");
+var shibor = db2.load("shibor_on");
 
 var mms = generateMatureMonths("201709","201809",["01","05","09"])
-var futures = findFutureSerieWithin(testdb,profile.c,mms,"close",profile.nd,profile.fd);
+var futures = findFutureSerieWithin(db2,profile.c,mms,"close",profile.nd,profile.fd);
 
 var strikes = generateStrikes(profile.lowK,profile.highK,profile.step);
 var options = {};
 array_(mms).foreach(function(mm){
-	merge(options,findOptionSerieWithin(testdb,profile.c,mm,"c",strikes,"close",profile.nd,profile.fd));
+	merge(options,findOptionSerieWithin(db2,profile.c,mm,"c",strikes,"close",profile.nd,profile.fd));
 });
 
 var ivs = [];
@@ -97,7 +97,7 @@ object_(futures).foreach(function(kv){
 	});
 });
 
-var poss = [1,20,35,50,65,80,99]
+var poss = [1,15,30,50,70,85,99]
 console.error("dur\t"+poss.join("\t"));
 
 var volcone = volatilityCone(futures,[10,20,40,60],poss);

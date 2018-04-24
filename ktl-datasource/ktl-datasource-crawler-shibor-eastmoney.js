@@ -12,7 +12,7 @@ var DateFormat = K_DATE.DateFormat;
 
 var df = new DateFormat("yyyy-MM-dd-HH-mm-ss");
 
-var p = 0;
+var p = 1;
 var last = 2;
 
 var outfile = fs.openSync("shibor_on_"+df.format(new Date())+".txt","w");

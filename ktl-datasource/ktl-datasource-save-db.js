@@ -5,7 +5,7 @@ merge(global,require("../k/k-iterator"));
 merge(global,require("../ktl/ktl-database"));
 merge(global,require("./ktl-datasource"));
 
-var testdb = new Database("./test/db","test");
+var db2 = new Database("./test/db2","option");
 
 var datas = {};
 
@@ -16,15 +16,16 @@ combineData(datas,loadDceFutureHistoryDataAll("./test/DCE/0"));
 combineData(datas,loadDceOptionHistoryDataAll("./test/DCE/1"));
 combineData(datas,loadCzceFutureHistoryDataAll("./test/CZCE/0"));
 combineData(datas,loadCzceOptionHistoryDataAll("./test/CZCE/1"));
-combineData(datas,loadSseOptionWikitterDataAll("./test/SSE"));
+combineData(datas,loadCzceFutureCrawlDataAll("./test/CZCE/0_2018"));
+combineData(datas,loadCzceOptionCrawlDataAll("./test/CZCE/1_2018"));
 
 var total = Object.keys(datas).length;
 
 var count = 0;
 object_(datas).foreach(function(tag_data){
-	testdb.save(tag_data.$,tag_data._);
+	db2.save(tag_data.$,tag_data._);
 	count++;
 	console.error("("+count+"/"+total+") "+tag_data.$);
 });
 
-testdb.sync();
+db2.sync();

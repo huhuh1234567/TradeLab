@@ -67,7 +67,7 @@ var srate = 0.05;
 var spread = profile.step*srate;
 var queryOption = profile.queryOption;
 var queryUnderlying = profile.queryUnderlying;
-var ir = 0.025;
+var ir = 0.03;
 
 var day = date2offset(new Date());
 var mday = date2offset(df.parse(mm))-profile.mdelay;

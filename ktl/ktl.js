@@ -6,7 +6,7 @@
 	var K_DATE = require("../k/k-date");
 	var MS_OF_DAY = K_DATE.MS_OF_DAY;
 
-	var DAY_OF_YEAR = 252;
+	var DAY_OF_YEAR = 365;
 
 	function dtm(day,mday){
 		return day instanceof Date?Math.round((mday.getTime()-day.getTime())/MS_OF_DAY)>>0:mday-day;
