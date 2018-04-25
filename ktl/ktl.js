@@ -6,6 +6,9 @@
 	var K_DATE = require("../k/k-date");
 	var MS_OF_DAY = K_DATE.MS_OF_DAY;
 
+	var K_ITERATOR = require("../k/k-iterator");
+	var array_ = K_ITERATOR.array_;
+
 	var DAY_OF_YEAR = 365;
 
 	function dtm(day,mday){
@@ -100,12 +103,58 @@
 		}
 	}
 
+	function highOf(kvs){
+		var r = undefined;
+		array_(kvs).foreach(function(kv){
+			if(!isNaN(kv._)){
+				if(r===undefined){
+					r = kv;
+				}
+				else if(r._<kv._){
+					r = kv;
+				}
+			}
+		});
+		return r;
+	}
+
+	function lowOf(kvs){
+		var r = undefined;
+		array_(kvs).foreach(function(kv){
+			if(!isNaN(kv._)){
+				if(r===undefined){
+					r = kv;
+				}
+				else if(kv._<r._){
+					r = kv;
+				}
+			}
+		});
+		return r;
+	}
+
+	function anyValid(kv){
+		return array_(kv._).foreach(function(v){
+			return !isNaN(v)?true:undefined;
+		})!==undefined;
+	}
+
+	function allValid(kv){
+		return array_(kv._).foreach(function(v){
+			return isNaN(v)?false:undefined;
+		})===undefined;
+	}
+
 	merge(exports,{
 		DAY_OF_YEAR: DAY_OF_YEAR,
 		dtm: dtm,
 		ytm: ytm,
 		price: price,
-		print: print
+		print: print,
+		highOf: highOf,
+		lowOf: lowOf,
+		anyValid: anyValid,
+		allValid: allValid
 	});
 
 })();
