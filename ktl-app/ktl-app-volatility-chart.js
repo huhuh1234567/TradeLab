@@ -60,7 +60,7 @@ var PROFILE_M = {
 	mdelay: 22
 };
 
-var profile = PROFILE_M;
+var profile = PROFILE_SR;
 
 var shibor = db2.load("shibor_on");
 
@@ -97,7 +97,7 @@ object_(futures).foreach(function(kv){
 	});
 });
 
-var poss = [1,15,30,50,70,85,99]
+var poss = [1,5,32,50,68,95,99]
 console.error("dur\t"+poss.join("\t"));
 
 var volcone = volatilityCone(futures,[10,20,40,60],poss);

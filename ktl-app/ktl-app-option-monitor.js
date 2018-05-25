@@ -67,7 +67,7 @@ var srate = 0.05;
 var spread = profile.step*srate;
 var queryOption = profile.queryOption;
 var queryUnderlying = profile.queryUnderlying;
-var ir = 0.03;
+var ir = 0.0252;
 
 var day = date2offset(new Date());
 var mday = date2offset(df.parse(mm))-profile.mdelay;
@@ -86,16 +86,16 @@ queryUnderlying(c,function(uls){
 
 						var legacy = 0;
 						var atm = findNearestStrike(ulavg,step);
-						var atmc = opts["c_"+atm];
-						var atmp = opts["p_"+atm];
-						if(atmc&&atmp){
-							var atmcp = price(atmc[0],atmc[1],atmc[2],spread,srate);
-							var atmpp = price(atmp[0],atmp[1],atmp[2],spread,srate);
-							if(atmcp.liquidity&&atmpp.liquidity){
-								legacy = ulavg;
-								ulavg = Math.round(impliedFuturePrice(atmcp.average,atmpp.average,atm,ir,day,mday));
-							}
-						}
+						// var atmc = opts["c_"+atm];
+						// var atmp = opts["p_"+atm];
+						// if(atmc&&atmp){
+						// 	var atmcp = price(atmc[0],atmc[1],atmc[2],spread,srate);
+						// 	var atmpp = price(atmp[0],atmp[1],atmp[2],spread,srate);
+						// 	if(atmcp.liquidity&&atmpp.liquidity){
+						// 		legacy = ulavg;
+						// 		ulavg = Math.round(impliedFuturePrice(atmcp.average,atmpp.average,atm,ir,day,mday));
+						// 	}
+						// }
 
 						console.error("c="+c+", mm="+mm+", price="+ulavg+", spread="+ulspread+", legacy="+legacy);
 						console.error(singleLine);

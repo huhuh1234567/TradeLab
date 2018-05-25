@@ -77,8 +77,10 @@
 			if(vals.length>0){
 				if(self.vals.length==0){
 					self.offset = offset;
+					var count = 0;
 					array_(vals).foreach(function(v){
 						self.vals.push(v);
+						count++;
 					});
 				}
 				else{
@@ -99,7 +101,7 @@
 						else if(second<vals.length){
 							//set data
 							count_(second).foreach(function(i){
-								self.vals[first+i] = vals[first+i];
+								self.vals[first+i] = vals[i];
 							});
 							//push data
 							array_(vals,second,vals.length-second).foreach(function(v){
@@ -236,7 +238,7 @@
 				return nil_();
 			}
 		},
-		anyValid: function(datas){
+		anyValid_: function(datas){
 			return Data.zip_(datas).filter_(anyValid);
 		},
 		anyValid_r_: function(datas){
