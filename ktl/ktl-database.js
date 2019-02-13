@@ -125,7 +125,7 @@
 								rest = Math.min(rest,LEN_SEGMENT-start);
 								//step to next
 								current += rest;
-								//int segment offset
+								//in segment offset
 								var len = 0;
 								//find file
 								var page = pages===undefined?undefined:pages.find(kv$(segment));
