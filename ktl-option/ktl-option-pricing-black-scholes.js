@@ -16,7 +16,7 @@
 
 	merge(BlackScholesModel.prototype,{
 		___price: function(s, k, r, sigma, ytm, d){
-			if(f > 0 && sigma > 0){
+			if(s > 0 && sigma > 0){
 				var d1 = (Math.log(s / k) + (r + sigma * sigma * 0.5) * ytm) / (sigma * Math.sqrt(ytm))
 				var d2 = d1 - sigma * Math.sqrt(ytm);
 				if(d > 0){
