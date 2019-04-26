@@ -25,36 +25,56 @@ var Black76Model = require("../ktl-option/ktl-option-pricing-black-76").Black76M
 
 var b76m = new Black76Model();
 
-var db2 = new Database("./test/db2","option");
+var db2 = new Database("./test/db","option");
 
 var dfYM = new DateFormat("yyyyMM");
 var dfYMD = new DateFormat("yyyy-MM-dd");
 
 var PROFILE_SR = {
 	c: "sr",
-	nd: 45,
-	fd: 285,
-	lowK: 4000,
-	highK: 8000,
+	nd: 40,
+	fd: 280,
+	lowK: 4100,
+	highK: 6000,
 	step: 100,
-	mdelay: 37
+	mdelay: 26
 };
 
 var PROFILE_M = {
 	c: "m",
-	nd: 30,
-	fd: 270,
-	lowK: 2500,
-	highK: 3500,
+	nd: 37,
+	fd: 277,
+	lowK: 2300,
+	highK: 3200,
 	step: 50,
-	mdelay: 22
+	mdelay: 23
 };
 
-var profile = PROFILE_M;
+var PROFILE_CF = {
+	c: "cf",
+	nd: 40,
+	fd: 280,
+	lowK: 14000,
+	highK: 17400,
+	step: 200,
+	mdelay: 26
+};
+
+var PROFILE_C = {
+	c: "c",
+	nd: 37,
+	fd: 277,
+	lowK: 1680,
+	highK: 2100,
+	step: 20,
+	mdelay: 23
+};
+
+var profile = PROFILE_CF
 
 var shibor = db2.load("shibor_on");
 
-var mm = "201809";
+var mm = "201909";
 var mday = date2offset(dfYM.parse(mm))-profile.mdelay;
 
 var cm = profile.c+"_"+mm;
@@ -65,7 +85,7 @@ var options = array_(strikes).map_(function(strike){
 	return db2.load([cm,"c",strike,"close"].join("_"));
 }).toArray();
 
-console.error("date\t"+strikes.join("\t"));
+console.error("date\t\tcurr\t"+strikes.join("\t"));
 Data.anyValid_(options).foreach(function(kvs){
 	var day = kvs.$;
 	var vs = kvs._;
@@ -81,7 +101,7 @@ Data.anyValid_(options).foreach(function(kvs){
 				buffer.push(print(iv*100,2)+"%");
 			}
 			else{
-				buffer.push("");
+				buffer.push("--");
 			}
 			i++;
 		});

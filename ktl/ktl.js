@@ -13,11 +13,10 @@
 
 	function dtm(day,mday){
 		return day instanceof Date?Math.round((mday.getTime()-day.getTime())/MS_OF_DAY)>>0:mday-day;
-		return Math.round(diff/MS_OF_DAY)>>0
 	}
 
 	function ytm(day,mday){
-		return dtm(day,mday)/365;
+		return dtm(day,mday)/DAY_OF_YEAR;
 	}
 
 	function price(last,bid,ask,limit,rate){

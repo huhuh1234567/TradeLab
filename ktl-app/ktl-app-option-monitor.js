@@ -44,7 +44,7 @@ var df = new DateFormat("yyyyMM");
 var PROFILE_SR = {
 	c: "sr",
 	step: 100,
-	mdelay: 37,
+	mdelay: 26,
 	queryOption: queryCzceDelayOption,
 	queryUnderlying: queryCzceDelayFuture
 };
@@ -52,15 +52,31 @@ var PROFILE_SR = {
 var PROFILE_M = {
 	c: "m",
 	step: 50,
-	mdelay: 22,
+	mdelay: 23,
 	queryOption: queryDceDelayOption,
 	queryUnderlying: queryDceDelayFuture
 };
 
-var profile = PROFILE_SR;
+var PROFILE_CF = {
+	c: "cf",
+	step: 200,
+	mdelay: 26,
+	queryOption: queryCzceDelayOption,
+	queryUnderlying: queryCzceDelayFuture
+};
+
+var PROFILE_C = {
+	c: "c",
+	step: 20,
+	mdelay: 23,
+	queryOption: queryDceDelayOption,
+	queryUnderlying: queryDceDelayFuture
+};
+
+var profile = PROFILE_C;
 
 var c = profile.c;
-var mm = "201809";
+var mm = "201909";
 var step = profile.step;
 var range = 10;
 var srate = 0.05;
@@ -98,6 +114,8 @@ queryUnderlying(c,function(uls){
 						// }
 
 						console.error("c="+c+", mm="+mm+", price="+ulavg+", spread="+ulspread+", legacy="+legacy);
+						console.error(singleLine);
+						console.error(["c/p","strike","price","spread","impvol","delta","gamma","theta","vega"].join("\t"));
 						console.error(singleLine);
 
 						count_(range*2+1).foreach(function(i){

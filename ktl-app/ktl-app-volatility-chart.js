@@ -36,35 +36,55 @@ var volatilityCone = KTL_MODEL_VOLATILITY.volatilityCone;
 
 var b76m = new Black76Model();
 
-var db2 = new Database("./test/db2","option");
+var db2 = new Database("./test/db","option");
 
 var df = new DateFormat("yyyyMM");
 
 var PROFILE_SR = {
 	c: "sr",
-	nd: 45,
-	fd: 285,
-	lowK: 4000,
-	highK: 8000,
+	nd: 51,
+	fd: 321,
+	lowK: 3000,
+	highK: 10000,
 	step: 100,
 	mdelay: 37
 };
 
 var PROFILE_M = {
 	c: "m",
-	nd: 30,
-	fd: 270,
+	nd: 37,
+	fd: 307,
 	lowK: 2000,
 	highK: 4000,
 	step: 50,
-	mdelay: 22
+	mdelay: 23
 };
 
-var profile = PROFILE_SR;
+var PROFILE_CF = {
+	c: "cf",
+	nd: 51,
+	fd: 321,
+	lowK: 10000,
+	highK: 20000,
+	step: 200,
+	mdelay: 37
+};
+
+var PROFILE_C = {
+	c: "c",
+	nd: 37,
+	fd: 307,
+	lowK: 1000,
+	highK: 3000,
+	step: 20,
+	mdelay: 23
+};
+
+var profile = PROFILE_C;
 
 var shibor = db2.load("shibor_on");
 
-var mms = generateMatureMonths("201709","201809",["01","05","09"])
+var mms = generateMatureMonths("201709","201905",["01","05","09"])
 var futures = findFutureSerieWithin(db2,profile.c,mms,"close",profile.nd,profile.fd);
 
 var strikes = generateStrikes(profile.lowK,profile.highK,profile.step);
@@ -87,20 +107,23 @@ object_(futures).foreach(function(kv){
 		if(!isNaN(price)){
 			var atm = findNearestStrike(kv._,profile.step);
 			var optname = [c,mm,"c",""+atm,"close"].join("_");
-			var optprice = options[optname].find(day);
-			var rate = shibor.find(day);
-			if(!isNaN(optprice)&&!isNaN(rate)){
-				var iv = b76m.iv(optprice,price,atm,rate,day,mday,1);
-				ivs.push(iv);
+			var option = options[optname];
+			if(option!==undefined){
+				var optprice = options[optname].find(day);
+				var rate = shibor.find(day);
+				if(!isNaN(optprice)&&!isNaN(rate)){
+					var iv = b76m.iv(optprice,price,atm,rate,day,mday,1);
+					ivs.push(iv);
+				}
 			}
 		}
 	});
 });
 
-var poss = [1,5,32,50,68,95,99]
+var poss = [1,10,20,30,40,50,60,70,80,90,99]
 console.error("dur\t"+poss.join("\t"));
 
-var volcone = volatilityCone(futures,[10,20,40,60],poss);
+var volcone = volatilityCone(futures,[10,20,40,60,80,100],poss);
 object_(volcone).foreach(function(kv){
 	console.error(kv.$+"\t"+array_(kv._).map_(function(v){
 		return print(v*100.0,2)+"%";

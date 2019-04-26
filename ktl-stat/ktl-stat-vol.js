@@ -5,7 +5,6 @@
 
 	var KTL_STAT_MOV = require("./ktl-stat-move");
 	var moveSum_ = KTL_STAT_MOV.moveSum_;
-	var moveMerge_ = KTL_STAT_MOV.moveMerge_;
 
 	var Data = require("../ktl/ktl-data").Data;
 

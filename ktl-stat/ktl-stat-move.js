@@ -3,9 +3,6 @@
 	var K = require("../k/k");
 	var merge = K.merge;
 
-	var K_ITERATOR = require("../k/k-iterator");
-	var array_ = K_ITERATOR.array_;
-
 	var Data = require("../ktl/ktl-data").Data;
 
 	function moveCollect_(data_,period,map,reduce){
@@ -82,8 +79,10 @@
 
 	function sma(data,p0,p1){
 		var rst = new Data();
+		var w0 = p0/(p0+p1);
+		var w1 = 1-w0;
 		moveMerge_(data._(),function(val,sum){
-			return isNaN(sum)?val:w0*a+w1*val;
+			return isNaN(sum)?val:w0*val+w1*sum;
 		}).foreach(function(kv){
 			if(!isNaN(kv._)){
 				rst.update(kv.$,kv._);
@@ -93,7 +92,7 @@
 	}
 
 	function ema(data,p){
-		return sma(data,p-1,2);
+		return sma(data,2,p-1);
 	}
 
 	merge(exports,{

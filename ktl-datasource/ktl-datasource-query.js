@@ -39,6 +39,9 @@
 					error = e.toString();
 				}
 			}
+			if(error){
+				console.error("query dce delay future error: "+error);
+			}
 			callback(rst);
 		},10*1000);
 	}
@@ -68,19 +71,22 @@
 					error = e.toString();
 				}
 			}
+			if(error){
+				console.error("query dce delay option error: "+error);
+			}
 			callback(rst);
 		},10*1000);
 	}
 
 	function queryCzceDelayFuture(c,callback){
 		var date = new Date();
-		request("www.czce.com.cn","GET","/portal/DFSStaticFiles/Future/Quotation/ChineseFutureQuotation.htm",null,null,function(error,buf){
+		request("www.czce.com.cn","GET","/cn/DFSStaticFiles/Future/Quotation/ChineseFutureQuotation.htm",null,null,function(error,buf){
 			var rst = undefined;
 			if(!error){
 				rst = {};
 				try{
 					var $ = cheerio.load(iconv.decode(buf,"utf-8"));
-					var trs = $("#Quotation table tbody tr");
+					var trs = $("table tbody tr");
 					for(var i=1; i<trs.length; i++){
 						var tds = $("td",trs[i]);
 						var anchors = $("a",tds[0]);
@@ -104,19 +110,22 @@
 					error = e.toString();
 				}
 			}
+			if(error){
+				console.error("query czce delay future error: "+error);
+			}
 			callback(rst);
-		},10*1000);
+		},15*1000);
 	}
 
 	function queryCzceDelayOption(c,mm,callback){
 		var date = new Date();
-		request("www.czce.com.cn","GET","/portal/DFSStaticFiles/Option/Quotation/ChineseOptionQuotation.htm",null,null,function(error,buf){
+		request("www.czce.com.cn","GET","/cn/DFSStaticFiles/Option/Quotation/ChineseOptionQuotation.htm",null,null,function(error,buf){
 			var rst = null;
 			if(!error){
 				rst = {};
 				try{
 					var $ = cheerio.load(iconv.decode(buf,"utf-8"));
-					var trs = $("#Quotation table tbody tr");
+					var trs = $("table tbody tr");
 					for(var i=1; i<trs.length; i++){
 						var tds = $("td",trs[i]);
 						var anchors = $("a",tds[0]);
@@ -148,8 +157,11 @@
 					error = e.toString();
 				}
 			}
+			if(error){
+				console.error("query czce delay option error: "+error);
+			}
 			callback(rst);
-		},10*1000);
+		},15*1000);
 	}
 
 	merge(exports,{
