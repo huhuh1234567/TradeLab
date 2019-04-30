@@ -16,10 +16,6 @@ var price = KTL.price;
 var KTL_DATE = require("../ktl/ktl-date");
 var date2offset = KTL_DATE.date2offset;
 
-var KTL_OPTION = require("../ktl-option/ktl-option");
-var findNearestStrike = KTL_OPTION.findNearestStrike;
-var impliedFuturePrice = KTL_OPTION.impliedFuturePrice;
-
 var Black76Model = require("../ktl-option/ktl-option-pricing-black-76").Black76Model;
 
 var KTL_DATASOURCE_QUERY = require("../ktl-datasource/ktl-datasource-query");
@@ -101,7 +97,7 @@ queryUnderlying(c,function(uls){
 						var ulspread = Math.round(ulp.spread);
 
 						var legacy = 0;
-						var atm = findNearestStrike(ulavg,step);
+						var atm = Math.round(ulavg/step)*step;
 						// var atmc = opts["c_"+atm];
 						// var atmp = opts["p_"+atm];
 						// if(atmc&&atmp){

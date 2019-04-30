@@ -2,7 +2,7 @@
 
 	var K = require("../k/k");
 	var merge = K.merge;
-
+	
 	var KTL = require("../ktl/ktl");
 	var DAY_OF_YEAR = KTL.DAY_OF_YEAR;
 	var ytm = KTL.ytm;
@@ -90,6 +90,30 @@
 				return 0.0;
 			}
 		},
+		___priceOf: function(delta, k, r, sigmac, sigmap, ytm, nc, np, mm){
+			if(delta > -np && delta < nc){
+				var f = k;
+				var minf = 0;
+				var maxf = f * 2;
+				while(maxf - minf > mm * 0.5){
+					var delta0 = nc*this.___delta(f, k, r, sigmac, ytm, 1)+np*this.___delta(f, k, r, sigmap, ytm, -1)
+					if(delta0 - delta > 0){
+						maxf = f;
+					}
+					else{
+						minf = f;
+					}
+					f = (maxf + minf) * 0.5;
+				}
+				return Math.round(f / mm) * mm
+			}
+			else{
+				return 0.0;
+			}
+		},
+		model: function(){
+			return "";
+		},
 		price: function(s, k, r, sigma, day, mday, d){
 			return this.___price(s, k, r, sigma, ytm(day, mday), d)
 		},
@@ -111,6 +135,9 @@
 		rho: function(s, k, r, sigma, day, mday, d){
 			return this.___rho(s, k, r, sigma, ytm(day, mday), d)
 		},
+		priceOf: function(delta, k, r, sigmac, sigmap, day, mday, nc, np, mm){
+			return this.___r_price(delta, k, r, sigmac, sigmap, ytm(day, mday), nc, np, mm)
+		}
 	});
 
 	exports.PricingModel = PricingModel;

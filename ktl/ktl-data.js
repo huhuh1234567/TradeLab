@@ -1,7 +1,5 @@
 (function(){
 
-	var fs = require("fs");
-
 	var K = require("../k/k");
 	var merge = K.merge;
 	var kv$ = K.kv$;
@@ -15,8 +13,6 @@
 	var KTL = require("../ktl/ktl");
 	var anyValid = KTL.anyValid;
 	var allValid = KTL.allValid;
-
-	var BUFFER_SIZE = 4096;
 
 	function Data(offset,vals){
 		this.offset = offset===undefined?0:offset;

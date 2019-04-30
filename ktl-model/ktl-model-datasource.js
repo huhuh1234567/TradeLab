@@ -66,7 +66,7 @@
 			});
 			//mid years
 			count_(ly-fy-1).foreach(function(my){
-				date.setFullYear(my);
+				date.setFullYear(fy+1+my);
 				array_(mms).foreach(function(mm){
 					date.setMonth(mm);
 					rst.push(DF_YM.format(date));

@@ -34,18 +34,18 @@ var PROFILE_SR = {
 	c: "sr",
 	nd: 40,
 	fd: 280,
-	lowK: 4100,
-	highK: 6000,
+	lowK: 5000,
+	highK: 7500,
 	step: 100,
-	mdelay: 26
+	mdelay: 36
 };
 
 var PROFILE_M = {
 	c: "m",
 	nd: 37,
 	fd: 277,
-	lowK: 2300,
-	highK: 3200,
+	lowK: 2350,
+	highK: 3650,
 	step: 50,
 	mdelay: 23
 };
@@ -70,11 +70,13 @@ var PROFILE_C = {
 	mdelay: 23
 };
 
-var profile = PROFILE_CF
+var profile = PROFILE_M;
+
+var cp = 1;
 
 var shibor = db2.load("shibor_on");
 
-var mm = "201909";
+var mm = "201809";
 var mday = date2offset(dfYM.parse(mm))-profile.mdelay;
 
 var cm = profile.c+"_"+mm;
@@ -82,14 +84,14 @@ var future = db2.load(cm+"_close");
 
 var strikes = generateStrikes(profile.lowK,profile.highK,profile.step);
 var options = array_(strikes).map_(function(strike){
-	return db2.load([cm,"c",strike,"close"].join("_"));
+	return db2.load([cm,cp>0?"c":"p",strike,"close"].join("_"));
 }).toArray();
 
-console.error("date\t\tcurr\t"+strikes.join("\t"));
-Data.anyValid_(options).foreach(function(kvs){
+console.error("date|curr|"+strikes.join("|"));
+Data.zip_([future].concat(options)).foreach(function(kvs){
 	var day = kvs.$;
 	var vs = kvs._;
-	var fv = future.find(day);
+	var fv = vs.shift();
 	var rate = shibor.find(day);
 	if(!isNaN(fv)&&!isNaN(rate)){
 		var buffer = [dfYMD.format(offset2date(day)),fv];
@@ -97,7 +99,7 @@ Data.anyValid_(options).foreach(function(kvs){
 		array_(vs).foreach(function(v){
 			if(!isNaN(v)){
 				var k = parseFloat(strikes[i]);
-				var iv = b76m.iv(v,fv,k,rate,day,mday,1);
+				var iv = b76m.iv(v,fv,k,rate,day,mday,cp);
 				buffer.push(print(iv*100,2)+"%");
 			}
 			else{
@@ -105,6 +107,6 @@ Data.anyValid_(options).foreach(function(kvs){
 			}
 			i++;
 		});
-		console.error(buffer.join("\t"));
+		console.error(buffer.join("|"));
 	}
 });

@@ -10,10 +10,6 @@
 		return cp*(s-k);
 	}
 
-	function findNearestStrike(s,step){
-		return Math.round(s/step)*step;
-	}
-
 	function ___impliedStockRate(pc,pp,s,k,ytm){
 		return -Math.log((s-pc+pp)/k)/ytm;
 	}
@@ -49,7 +45,6 @@
 	merge(exports,{
 
 		moneyness: moneyness,
-		findNearestStrike: findNearestStrike,
 
 		___impliedStockRate: ___impliedStockRate,
 		___impliedFutureRate: ___impliedFutureRate,

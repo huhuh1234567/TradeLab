@@ -23,9 +23,6 @@ var generateStrikes = KTL_MODEL_DATASOURCE.generateStrikes;
 var findFutureSerieWithin = KTL_MODEL_DATASOURCE.findFutureSerieWithin;
 var findOptionSerieWithin = KTL_MODEL_DATASOURCE.findOptionSerieWithin;
 
-var KTL_OPTION = require("../ktl-option/ktl-option");
-var findNearestStrike = KTL_OPTION.findNearestStrike;
-
 var Black76Model = require("../ktl-option/ktl-option-pricing-black-76").Black76Model;
 
 var KTL_STAT = require("../ktl-stat/ktl-stat");
@@ -80,7 +77,7 @@ var PROFILE_C = {
 	mdelay: 23
 };
 
-var profile = PROFILE_C;
+var profile = PROFILE_SR;
 
 var shibor = db2.load("shibor_on");
 
@@ -105,7 +102,7 @@ object_(futures).foreach(function(kv){
 		var day = kv.$;
 		var price = kv._;
 		if(!isNaN(price)){
-			var atm = findNearestStrike(kv._,profile.step);
+			var atm = Math.round(kv._/profile.step)*profile.step;
 			var optname = [c,mm,"c",""+atm,"close"].join("_");
 			var option = options[optname];
 			if(option!==undefined){
@@ -123,7 +120,7 @@ object_(futures).foreach(function(kv){
 var poss = [1,10,20,30,40,50,60,70,80,90,99]
 console.error("dur\t"+poss.join("\t"));
 
-var volcone = volatilityCone(futures,[10,20,40,60,80,100],poss);
+var volcone = volatilityCone(futures,[22,44,66,88],poss);
 object_(volcone).foreach(function(kv){
 	console.error(kv.$+"\t"+array_(kv._).map_(function(v){
 		return print(v*100.0,2)+"%";
