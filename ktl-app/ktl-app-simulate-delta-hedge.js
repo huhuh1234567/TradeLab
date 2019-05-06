@@ -24,77 +24,44 @@ var histogram = KTL_STAT.histogram;
 var KTL_MODEL_SIMULATE = require("../ktl-model/ktl-model-simulate");
 var deltaHedge = KTL_MODEL_SIMULATE.deltaHedge;
 
+var PROFILE = require("../ktl-app/ktl-app-profile");
+var dayfix = PROFILE.dayfix;
+
 var b76m = new Black76Model();
 
 var db2 = new Database("./test/db","option");
 
-var PROFILE_SR = {
-	c: "sr",
-	mdelay: 26,
-	step: 100,
-	plex: 10,
-	dprice: 5,
-	fee: 3.3,
-	spread: 2
-};
+var profile = PROFILE.M;
 
-var PROFILE_M = {
-	c: "m",
-	mdelay: 23,
-	step: 50,
-	plex: 10,
-	dprice: 5,
-	fee: 1.65,
-	spread: 2
-};
+var cp = 0;
 
-var PROFILE_CF = {
-	c: "cf",
-	mdelay: 26,
-	step: 200,
-	plex: 5,
-	dprice: 25,
-	fee: 4.95,
-	spread: 10
-};
-
-var PROFILE_C = {
-	c: "c",
-	mdelay: 23,
-	step: 20,
-	plex: 10,
-	dprice: 5,
-	fee: 1.1,
-	spread: 2
-};
-
-var profile = PROFILE_M;
-
-var cp = -1;
-
-var iv = 0.119;
+var iv = 0.125;
 
 var cnt = 20;
 
 var th = 1.0;
 
 var md = profile.mdelay
-var ld = md+30;
-var nd = md+135;
-var fd = md+165;
+var ld = md+45;
+var nd = md+75;
+var fd = md+195;
 
 var n = 10;
 
 var shibor = db2.load("shibor_on");
 
 var mms = generateMatureMonths("201709","201905",["01","05","09"])
-var futures = findFutureSerieWithin(db2,profile.c,mms,"close",md,fd);
+var futures = findFutureSerieWithin(db2,profile.c,mms,"close",md-5,fd+15);
 
 var pnlss = [];
 object_(futures).foreach(function(kv){
 	var name = kv.$;
 	var data = kv._;
-	pnlss.push(deltaHedge(name,data,shibor,b76m,cp,iv,md,ld,nd,fd,cnt,th,profile.step,profile.plex,profile.dprice,profile.fee,profile.spread));
+	var names = name.split("_");
+	var c = names[0];
+	var mm = names[1];
+	var dfx = dayfix(c,mm);
+	pnlss.push(deltaHedge(name,data,shibor,b76m,cp,iv,md-dfx,ld-dfx,nd-dfx,fd-dfx,cnt,th,profile.step,profile.plex,profile.fee,profile.spread));
 });
 
 var sum = 0;
@@ -113,5 +80,5 @@ var tt = [];
 count_(n+1).foreach(function(i){
 	tt.push(print(min+gap*i,2));
 });
-console.error("|avg|"+tt.join("|"));
-console.error("|"+print(sum/count,2)+"|"+histo.histo.join("|"));
+console.error("avg|"+tt.join("|"));
+console.error(print(sum/count,2)+"|"+histo.histo.join("|"));

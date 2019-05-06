@@ -23,61 +23,32 @@ var Black76Model = require("../ktl-option/ktl-option-pricing-black-76").Black76M
 var KTL_MODEL_SIMULATE = require("../ktl-model/ktl-model-simulate");
 var realDeltaHedge = KTL_MODEL_SIMULATE.realDeltaHedge;
 
+var PROFILE = require("../ktl-app/ktl-app-profile");
+var dayfix = PROFILE.dayfix;
+
 var b76m = new Black76Model();
 
 var db2 = new Database("./test/db","option");
 
-var PROFILE_SR = {
-	c: "sr",
-	mdelay: 36,
-	lowK: 3000,
-	highK: 10000,
+var PROFILE_SR = merge(PROFILE.SR,{
 	ivlb: 0.08,
-	ivub: 0.115,
-	step: 100,
-	plex: 10,
-	fee: 3.3,
-	spread: 2
-};
+	ivub: 0.115
+});
 
-var PROFILE_M = {
-	c: "m",
-	mdelay: 23,
-	lowK: 2000,
-	highK: 4000,
+var PROFILE_M = merge(PROFILE.M,{
 	ivlb: 0.12,
-	ivub: 0.16,
-	step: 50,
-	plex: 10,
-	fee: 1.65,
-	spread: 2
-};
+	ivub: 0.16
+});
 
-var PROFILE_CF = {
-	c: "cf",
-	mdelay: 26,
-	lowK: 10000,
-	highK: 20000,
+var PROFILE_CF = merge(PROFILE.CF,{
 	ivlb: 0.10,
-	ivub: 0.15,
-	step: 200,
-	plex: 5,
-	fee: 4.95,
-	spread: 10
-};
+	ivub: 0.15
+});
 
-var PROFILE_C = {
-	c: "c",
-	mdelay: 23,
-	lowK: 1000,
-	highK: 3000,
+var PROFILE_C = merge(PROFILE.C,{
 	ivlb: 0.065,
-	ivub: 0.095,
-	step: 20,
-	plex: 10,
-	fee: 1.1,
-	spread: 2
-};
+	ivub: 0.095
+});
 
 var profile = PROFILE_SR;
 
@@ -95,7 +66,7 @@ var fd = md+195;
 var shibor = db2.load("shibor_on");
 
 var mms = generateMatureMonths("201709","201905",["01","05","09"])
-var futures = findFutureSerieWithin(db2,profile.c,mms,"close",md,fd);
+var futures = findFutureSerieWithin(db2,profile.c,mms,"close",md-5,fd+15);
 
 var strikes = generateStrikes(profile.lowK,profile.highK,profile.step);
 
@@ -114,12 +85,16 @@ array_(ivlbs).foreach(function(ivlb){
 		var count = 0;
 		var minv = undefined;
 		var maxv = undefined;
+		var ddd0 = new Date();
 		object_(futures).foreach(function(kv){
 			var name = kv.$;
 			var data = kv._;
 			var names = name.split("_");
-			var options = findOptionSerieWithin(db2,names[0],names[1],"cp",strikes,"close",md,fd);
-			var trades = realDeltaHedge(name,data,options,shibor,b76m,cp,ivlb,ivub,md,ld,nd,fd,cnt,th,profile.step,profile.plex,profile.fee,profile.spread);
+			var c = names[0];
+			var mm = names[1];
+			var dfx = dayfix(c,mm);
+			var options = findOptionSerieWithin(db2,c,mm,"cp",strikes,"close",md-dfx,fd-dfx);
+			var trades = realDeltaHedge(name,data,options,shibor,b76m,cp,ivlb,ivub,md-dfx,ld-dfx,nd-dfx,fd-dfx,cnt,th,profile.step,profile.plex,profile.fee,profile.spread);
 			array_(trades).foreach(function(trade){
 				var pnl = trade[2];
 				sum += pnl;
@@ -128,7 +103,7 @@ array_(ivlbs).foreach(function(ivlb){
 				max = maxv===undefined?pnl:Math.max(maxv,pnl);
 			});
 		});
-		matrix.push([count,sum/count,minv,maxv]);
+		matrix.push([count,sum/count,minv,maxv,new Date()-ddd0]);
 		if(matrix.length%10==0){
 			console.error("simulate "+matrix.length+" finished");
 		}
@@ -166,6 +141,18 @@ array_(ivlbs).foreach(function(ivlb){
 	var fields = [];
 	array_(ivubs).foreach(function(){
 		fields.push(print(matrix[index][2],2));
+		index++;
+	});
+	console.error(ivlb+"|"+fields.join("|"));
+});
+
+var index = 0;
+console.error();
+console.error("time|"+ivubs.join("|"));
+array_(ivlbs).foreach(function(ivlb){
+	var fields = [];
+	array_(ivubs).foreach(function(){
+		fields.push(print(matrix[index][4],0));
 		index++;
 	});
 	console.error(ivlb+"|"+fields.join("|"));

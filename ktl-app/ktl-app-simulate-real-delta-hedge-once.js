@@ -29,80 +29,40 @@ var histogram = KTL_STAT.histogram;
 var KTL_MODEL_SIMULATE = require("../ktl-model/ktl-model-simulate");
 var realDeltaHedge = KTL_MODEL_SIMULATE.realDeltaHedge;
 
+var PROFILE = require("../ktl-app/ktl-app-profile");
+var dayfix = PROFILE.dayfix;
+
 var b76m = new Black76Model();
 
 var db2 = new Database("./test/db","option");
 
 var df = new DateFormat("yyyy-MM-dd");
 
-var PROFILE_SR = {
-	c: "sr",
-	mdelay: 36,
-	lowK: 3000,
-	highK: 10000,
-	step: 100,
-	plex: 10,
-	fee: 3.3,
-	spread: 2
-};
-
-var PROFILE_M = {
-	c: "m",
-	mdelay: 23,
-	lowK: 2000,
-	highK: 4000,
-	step: 50,
-	plex: 10,
-	fee: 1.65,
-	spread: 2
-};
-
-var PROFILE_CF = {
-	c: "cf",
-	mdelay: 26,
-	lowK: 10000,
-	highK: 20000,
-	step: 200,
-	plex: 5,
-	fee: 4.95,
-	spread: 10
-};
-
-var PROFILE_C = {
-	c: "c",
-	mdelay: 23,
-	lowK: 1000,
-	highK: 3000,
-	step: 20,
-	plex: 10,
-	fee: 1.1,
-	spread: 2
-};
-
-var profile = PROFILE_M;
+var profile = PROFILE.SR;
 
 var cp = 1;
 
-var ivlb = 0.13;
-var ivub = 0.17;
+var ivlb = 0.098;
+var ivub = 0.13;
 
 var cnt = 10;
 
 var th = 1.0;
 
-var md = profile.mdelay
+var c = profile.c;
+var mm = "201905";
+
+var md = profile.mdelay-dayfix(c,mm);
 var ld = md+45;
 var nd = md+75;
 var fd = md+195;
 
-var mm = "201805";
-
-var name = [profile.c,mm,"close"].join("_");
+var name = [c,mm,"close"].join("_");
 var future = db2.load(name);
 var shibor = db2.load("shibor_on");
 
 var strikes = generateStrikes(profile.lowK,profile.highK,profile.step);
-var options = findOptionSerieWithin(db2,profile.c,mm,"cp",strikes,"close",md,fd);
+var options = findOptionSerieWithin(db2,c,mm,"cp",strikes,"close",md,fd);
 
 var trades = realDeltaHedge(name,future,options,shibor,b76m,cp,ivlb,ivub,md,ld,nd,fd,cnt,th,profile.step,profile.plex,profile.fee,profile.spread);
 

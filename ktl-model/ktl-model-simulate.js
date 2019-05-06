@@ -31,7 +31,7 @@
 	function calculateOptionByImplVol(pm,price,strike,rate,iv,day,mday,cp){
 		return cp===0?{
 			oprice: 0.5*(pm.price(price,strike,rate,iv,day,mday,1)+pm.price(price,strike,rate,iv,day,mday,-1)),
-			delta: 0.5*(pm.delta(price,strike,rate,ivc,day,mday,1)+pm.delta(price,strike,rate,ivp,day,mday,-1))
+			delta: 0.5*(pm.delta(price,strike,rate,iv,day,mday,1)+pm.delta(price,strike,rate,iv,day,mday,-1))
 		}:{
 			oprice: pm.price(price,strike,rate,iv,day,mday,cp),
 			delta: pm.delta(price,strike,rate,iv,day,mday,cp)
@@ -150,7 +150,7 @@
 		return pnl;
 	}
 
-	function deltaHedgeOnce(name,data,rdata,pm,cp,iv,md,ld,d0,ocnt,th,step,plex,dp,fee,sprd,verbose){
+	function deltaHedgeOnce(name,data,rdata,pm,cp,iv,md,ld,d0,ocnt,th,step,plex,fee,sprd,verbose){
 		
 		var vs = name.split("_");
 		var mm = vs[1];
@@ -165,7 +165,7 @@
 			var strike = Math.round(price/step)*step;
 			var option = calculateOptionByImplVol(pm,price,strike,rate,iv,day,mday,cp);
 			if(option!==undefined){
-				return hedgeSimulate(data,day,price,option.oprice,-Math.round(option.delta),function(day,price){
+				return hedgeSimulate(data,day,price,option.oprice,-Math.round(ocnt*option.delta),function(day,price){
 					var rate = rdata.find(day);
 					if(!Number.isNaN(rate)&&day>lday){
 						var option = calculateOptionByImplVol(pm,price,strike,rate,iv,day,mday,cp);
@@ -178,10 +178,7 @@
 					if(!Number.isNaN(rate)){
 						var option = calculateOptionByImplVol(pm,price,strike,rate,iv,day,mday,cp);
 						if(option!==undefined){
-							var option = calculateOptionByImplVol(pm,price-Math.sign(ocnt*option.delta+ulcnt)*dp,strike,rate,iv,day,mday,cp);
-							if(option!==undefined){
-								return calculateHedgeCountByFloor(ocnt*option.delta+ulcnt,th);
-							}
+							return calculateHedgeCountByFloor(ocnt*option.delta+ulcnt,th);
 						}
 					}
 				},ocnt,plex,fee,sprd,verbose);
@@ -189,7 +186,7 @@
 		}
 	}
 
-	function deltaHedge(name,data,rdata,pm,cp,iv,md,ld,nd,fd,ocnt,th,step,plex,dp,fee,sprd){
+	function deltaHedge(name,data,rdata,pm,cp,iv,md,ld,nd,fd,ocnt,th,step,plex,fee,sprd){
 
 		var rst = [];
 		
@@ -203,7 +200,7 @@
 				if(d<=nd){
 					return true;
 				}
-				var pnl = deltaHedgeOnce(name,data,rdata,pm,cp,iv,md,ld,d,ocnt,th,step,plex,dp,fee,sprd);
+				var pnl = deltaHedgeOnce(name,data,rdata,pm,cp,iv,md,ld,d,ocnt,th,step,plex,fee,sprd);
 				if(pnl!==undefined){
 					rst.push(pnl);
 				}
@@ -213,7 +210,7 @@
 		return rst;
 	}
 
-	function deltaHedgeVolatilityOnce(name,data,rdata,pm,cp,md,ld,d0,ocnt,th,step,plex,dp,fee,sprd){
+	function deltaHedgeVolatilityOnce(name,data,rdata,pm,cp,md,ld,d0,ocnt,th,step,plex,fee,sprd){
 	
 		var EPSILON = 1e-6;
 
@@ -222,7 +219,7 @@
 
 		while(maxiv-miniv>EPSILON){
 			var iv = (maxiv + miniv) * 0.5;
-			var piv = deltaHedgeOnce(name,data,rdata,pm,cp,iv,md,ld,d0,ocnt,th,step,plex,dp,fee,sprd);
+			var piv = deltaHedgeOnce(name,data,rdata,pm,cp,iv,md,ld,d0,ocnt,th,step,plex,fee,sprd);
 			if(piv>0){
 				miniv = iv;
 			}
@@ -234,7 +231,7 @@
 		return miniv;
 	}
 
-	function deltaHedgeVolatility(name,data,rdata,pm,cp,md,dur,nd,fd,ocnt,th,step,plex,dp,fee,sprd){
+	function deltaHedgeVolatility(name,data,rdata,pm,cp,md,dur,nd,fd,ocnt,th,step,plex,fee,sprd){
 
 		var rst = [];
 		
@@ -248,7 +245,7 @@
 				if(d<=nd){
 					return true;
 				}
-				rst.push(deltaHedgeVolatilityOnce(name,data,rdata,pm,cp,md,d-dur,d,ocnt,th,step,plex,dp,fee,sprd));
+				rst.push(deltaHedgeVolatilityOnce(name,data,rdata,pm,cp,md,d-dur,d,ocnt,th,step,plex,fee,sprd));
 			}
 		});
 
@@ -287,8 +284,7 @@
 						if(option!==undefined&&option.iv!==undefined&&option.iv<ivlb){
 							//enter trade
 							var day1 = day;
-							var ulhc = -Math.round(ocnt*option.delta);
-							var pnl = hedgeSimulate(uls,day,price,option.oprice,ulhc,function(day,price){
+							var pnl = hedgeSimulate(uls,day,price,option.oprice,-Math.round(ocnt*option.delta),function(day,price){
 								var rate = rates.find(day);
 								if(!Number.isNaN(rate)){
 									var option = calculateOptionByCallPutPrice(pm,price,strike,rate,optcs.find(day),optps.find(day),day,mday,cp);
@@ -312,7 +308,9 @@
 									}
 								}
 							},ocnt,plex,fee,sprd,verbose);
-							rst.push([day,day1,pnl]);
+							if(pnl!==undefined){
+								rst.push([day,day1,pnl]);
+							}
 						}
 					}
 				}

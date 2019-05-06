@@ -23,6 +23,9 @@ var Data = require("../ktl/ktl-data").Data;
 
 var Black76Model = require("../ktl-option/ktl-option-pricing-black-76").Black76Model;
 
+var PROFILE = require("../ktl-app/ktl-app-profile");
+var dayfix = PROFILE.dayfix;
+
 var b76m = new Black76Model();
 
 var db2 = new Database("./test/db","option");
@@ -30,45 +33,25 @@ var db2 = new Database("./test/db","option");
 var dfYM = new DateFormat("yyyyMM");
 var dfYMD = new DateFormat("yyyy-MM-dd");
 
-var PROFILE_SR = {
-	c: "sr",
-	nd: 40,
-	fd: 280,
+var PROFILE_SR = merge(PROFILE.SR,{
 	lowK: 5000,
-	highK: 7500,
-	step: 100,
-	mdelay: 36
-};
+	highK: 7500
+});
 
-var PROFILE_M = {
-	c: "m",
-	nd: 37,
-	fd: 277,
+var PROFILE_M = merge(PROFILE.M,{
 	lowK: 2350,
-	highK: 3650,
-	step: 50,
-	mdelay: 23
-};
+	highK: 3650
+});
 
-var PROFILE_CF = {
-	c: "cf",
-	nd: 40,
-	fd: 280,
+var PROFILE_CF = merge(PROFILE.CF,{
 	lowK: 14000,
-	highK: 17400,
-	step: 200,
-	mdelay: 26
-};
+	highK: 17400
+});
 
-var PROFILE_C = {
-	c: "c",
-	nd: 37,
-	fd: 277,
+var PROFILE_C = merge(PROFILE.C,{
 	lowK: 1680,
-	highK: 2100,
-	step: 20,
-	mdelay: 23
-};
+	highK: 2100
+});
 
 var profile = PROFILE_M;
 
@@ -76,10 +59,12 @@ var cp = 1;
 
 var shibor = db2.load("shibor_on");
 
+var c = profile.c;
 var mm = "201809";
-var mday = date2offset(dfYM.parse(mm))-profile.mdelay;
+var dfx = dayfix(c,mm);
+var mday = date2offset(dfYM.parse(mm))-profile.mdelay+dfx;
 
-var cm = profile.c+"_"+mm;
+var cm = c+"_"+mm;
 var future = db2.load(cm+"_close");
 
 var strikes = generateStrikes(profile.lowK,profile.highK,profile.step);
