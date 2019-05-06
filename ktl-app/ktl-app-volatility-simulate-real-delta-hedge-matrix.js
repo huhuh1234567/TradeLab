@@ -50,11 +50,11 @@ var PROFILE_C = merge(PROFILE.C,{
 	ivub: 0.095
 });
 
-var profile = PROFILE_SR;
+var profile = PROFILE_M;
 
 var cp = 0;
 
-var cnt = 20;
+var cnt = 10;
 
 var th = 1.0;
 
@@ -70,11 +70,11 @@ var futures = findFutureSerieWithin(db2,profile.c,mms,"close",md-5,fd+15);
 
 var strikes = generateStrikes(profile.lowK,profile.highK,profile.step);
 
-var ivlbs = count_(11).map_(function(i){
-	return profile.ivlb+i*0.003;
+var ivlbs = count_(16).map_(function(i){
+	return profile.ivlb+i*0.002;
 }).toArray();
-var ivubs = count_(11).map_(function(i){
-	return profile.ivub+i*0.003;
+var ivubs = count_(16).map_(function(i){
+	return profile.ivub+i*0.002;
 }).toArray();
 
 var matrix = [];

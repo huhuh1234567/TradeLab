@@ -24,6 +24,9 @@ var queryDceDelayOption = KTL_DATASOURCE_QUERY.queryDceDelayOption;
 var queryCzceDelayFuture = KTL_DATASOURCE_QUERY.queryCzceDelayFuture;
 var queryCzceDelayOption = KTL_DATASOURCE_QUERY.queryCzceDelayOption;
 
+var PROFILE = require("../ktl-app/ktl-app-profile");
+var dayfix = PROFILE.dayfix;
+
 var singleLine = count_(12).map_(function(){
 	return "----------";
 }).toArray().join("");
@@ -37,39 +40,27 @@ var b76m = new Black76Model();
 var df = new DateFormat("yyyyMM");
 
 
-var PROFILE_SR = {
-	c: "sr",
-	step: 100,
-	mdelay: 26,
+var PROFILE_SR = merge(PROFILE.SR,{
 	queryOption: queryCzceDelayOption,
 	queryUnderlying: queryCzceDelayFuture
-};
+});
 
-var PROFILE_M = {
-	c: "m",
-	step: 50,
-	mdelay: 23,
+var PROFILE_M = merge(PROFILE.M,{
 	queryOption: queryDceDelayOption,
 	queryUnderlying: queryDceDelayFuture
-};
+});
 
-var PROFILE_CF = {
-	c: "cf",
-	step: 200,
-	mdelay: 26,
+var PROFILE_CF = merge(PROFILE.CF,{
 	queryOption: queryCzceDelayOption,
 	queryUnderlying: queryCzceDelayFuture
-};
+});
 
-var PROFILE_C = {
-	c: "c",
-	step: 20,
-	mdelay: 23,
+var PROFILE_C = merge(PROFILE.C,{
 	queryOption: queryDceDelayOption,
 	queryUnderlying: queryDceDelayFuture
-};
+});
 
-var profile = PROFILE_C;
+var profile = PROFILE_M;
 
 var c = profile.c;
 var mm = "201909";
@@ -79,10 +70,10 @@ var srate = 0.05;
 var spread = profile.step*srate;
 var queryOption = profile.queryOption;
 var queryUnderlying = profile.queryUnderlying;
-var ir = 0.0252;
+var ir = 0.026;
 
 var day = date2offset(new Date());
-var mday = date2offset(df.parse(mm))-profile.mdelay;
+var mday = date2offset(df.parse(mm))-profile.mdelay+dayfix(c,mm);
 
 queryUnderlying(c,function(uls){
 	if(uls){
@@ -98,16 +89,6 @@ queryUnderlying(c,function(uls){
 
 						var legacy = 0;
 						var atm = Math.round(ulavg/step)*step;
-						// var atmc = opts["c_"+atm];
-						// var atmp = opts["p_"+atm];
-						// if(atmc&&atmp){
-						// 	var atmcp = price(atmc[0],atmc[1],atmc[2],spread,srate);
-						// 	var atmpp = price(atmp[0],atmp[1],atmp[2],spread,srate);
-						// 	if(atmcp.liquidity&&atmpp.liquidity){
-						// 		legacy = ulavg;
-						// 		ulavg = Math.round(impliedFuturePrice(atmcp.average,atmpp.average,atm,ir,day,mday));
-						// 	}
-						// }
 
 						console.error("c="+c+", mm="+mm+", price="+ulavg+", spread="+ulspread+", legacy="+legacy);
 						console.error(singleLine);

@@ -39,15 +39,15 @@ var db2 = new Database("./test/db","option");
 
 var df = new DateFormat("yyyyMM");
 
-var profile = PROFILE.SR;
+var profile = PROFILE.C;
 
 var md = profile.mdelay
-var nd = profile.mdelay+45;
+var nd = md+45;
 var fd = md+195
 
 var shibor = db2.load("shibor_on");
 
-var mms = generateMatureMonths("201709","201905",["01","05","09"])
+var mms = generateMatureMonths("201905","201905",["01","05","09"])
 var futures = findFutureSerieWithin(db2,profile.c,mms,"close",nd-5,fd+15);
 
 var strikes = generateStrikes(profile.lowK,profile.highK,profile.step);
@@ -95,6 +95,7 @@ var n = 20;
 var poss = [1,5,10,15,20,25,30,35,40,45,50,55,60,65,70,75,80,85,90,95,99]
 
 array_([ivcs,ivps]).foreach(function(ivs){
+	console.error();
 	//histo
 	var histo = histogram([ivs],n);
 	var min = histo.min;
@@ -104,12 +105,10 @@ array_([ivcs,ivps]).foreach(function(ivs){
 		return print((min+gap*i)*100.0,2)+"%";
 	}).toArray().join("\t"));
 	console.error("\t"+histo.histo.join("\t"));
-	console.error();
 	//percents
 	var ivpcs = percents([ivs],poss);
 	console.error("p-cents\t"+poss.join("\t"));
 	console.error("\t"+array_(ivpcs).map_(function(v){
 		return print(v*100.0,2)+"%";
 	}).toArray().join("\t"));
-	console.error();
 });

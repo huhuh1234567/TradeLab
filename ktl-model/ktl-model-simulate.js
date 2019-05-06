@@ -245,7 +245,10 @@
 				if(d<=nd){
 					return true;
 				}
-				rst.push(deltaHedgeVolatilityOnce(name,data,rdata,pm,cp,md,d-dur,d,ocnt,th,step,plex,fee,sprd));
+				var vol = deltaHedgeVolatilityOnce(name,data,rdata,pm,cp,md,d-dur,d,ocnt,th,step,plex,fee,sprd);
+				if(vol>0){
+					rst.push(vol);
+				}
 			}
 		});
 
