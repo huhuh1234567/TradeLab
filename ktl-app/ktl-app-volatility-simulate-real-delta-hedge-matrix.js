@@ -85,7 +85,6 @@ array_(ivlbs).foreach(function(ivlb){
 		var count = 0;
 		var minv = undefined;
 		var maxv = undefined;
-		var ddd0 = new Date();
 		object_(futures).foreach(function(kv){
 			var name = kv.$;
 			var data = kv._;
@@ -103,7 +102,7 @@ array_(ivlbs).foreach(function(ivlb){
 				max = maxv===undefined?pnl:Math.max(maxv,pnl);
 			});
 		});
-		matrix.push([count,sum/count,minv,maxv,new Date()-ddd0]);
+		matrix.push([count,sum/count,minv,maxv]);
 		if(matrix.length%10==0){
 			console.error("simulate "+matrix.length+" finished");
 		}
@@ -141,18 +140,6 @@ array_(ivlbs).foreach(function(ivlb){
 	var fields = [];
 	array_(ivubs).foreach(function(){
 		fields.push(print(matrix[index][2],2));
-		index++;
-	});
-	console.error(ivlb+"|"+fields.join("|"));
-});
-
-var index = 0;
-console.error();
-console.error("time|"+ivubs.join("|"));
-array_(ivlbs).foreach(function(ivlb){
-	var fields = [];
-	array_(ivubs).foreach(function(){
-		fields.push(print(matrix[index][4],0));
 		index++;
 	});
 	console.error(ivlb+"|"+fields.join("|"));
