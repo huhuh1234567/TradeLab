@@ -8,7 +8,6 @@
 
 	var K_ITERATOR = require("../k/k-iterator");
 	var array_ = K_ITERATOR.array_;
-	var object_ = K_ITERATOR.object_;
 
 	var K_HTTPCLIENT = require("../k/k-httpclient");
 	var request = K_HTTPCLIENT.request;
@@ -43,7 +42,7 @@
 				console.error("query dce delay future error: "+error);
 			}
 			callback(rst);
-		},10*1000);
+		},5*1000);
 	}
 
 	function queryDceDelayOption(c,mm,callback){
@@ -75,7 +74,7 @@
 				console.error("query dce delay option error: "+error);
 			}
 			callback(rst);
-		},10*1000);
+		},5*1000);
 	}
 
 	function queryCzceDelayFuture(c,callback){
@@ -114,7 +113,7 @@
 				console.error("query czce delay future error: "+error);
 			}
 			callback(rst);
-		},15*1000);
+		},5*1000);
 	}
 
 	function queryCzceDelayOption(c,mm,callback){
@@ -161,7 +160,7 @@
 				console.error("query czce delay option error: "+error);
 			}
 			callback(rst);
-		},15*1000);
+		},5*1000);
 	}
 
 	merge(exports,{

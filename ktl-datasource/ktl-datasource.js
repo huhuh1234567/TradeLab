@@ -61,7 +61,7 @@
 		var my = parseInt(str.substring(0,pos));
 		var step = Math.pow(10,pos);
 		var cy = div2(curr,step);
-		var rst = cy[1]<=my?my+cy[0]*step:my+(cy[0]-1)*step;
+		var rst = cy[1]<=my?my+cy[0]*step:my+(cy[0]+1)*step;
 		return rst+mm;
 	}
 

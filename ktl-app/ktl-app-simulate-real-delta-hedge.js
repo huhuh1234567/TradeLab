@@ -1,15 +1,11 @@
 
 var K = require("../k/k");
 var merge = K.merge;
-var kv$ = K.kv$;
 
 var K_ITERATOR = require("../k/k-iterator");
 var count_ = K_ITERATOR.count_;
 var array_ = K_ITERATOR.array_;
 var object_ = K_ITERATOR.object_;
-
-var K_DATE = require("../k/k-date");
-var DateFormat = K_DATE.DateFormat;
 
 var KTL = require("../ktl/ktl")
 var print = KTL.print;

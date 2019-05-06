@@ -1,15 +1,7 @@
 
-var K = require("../k/k");
-var merge = K.merge;
-var kv$ = K.kv$;
-
 var K_ITERATOR = require("../k/k-iterator");
-var count_ = K_ITERATOR.count_;
 var array_ = K_ITERATOR.array_;
 var object_ = K_ITERATOR.object_;
-
-var K_DATE = require("../k/k-date");
-var DateFormat = K_DATE.DateFormat;
 
 var KTL = require("../ktl/ktl")
 var print = KTL.print;
@@ -71,8 +63,8 @@ var spread = 0;
 var th = 1.0;
 
 var md = profile.mdelay
-var lld = 20;
-var ffd = 180;
+var lld = 45;
+var ffd = 195;
 
 var poss = [1,10,20,30,40,50,60,70,80,90,99]
 

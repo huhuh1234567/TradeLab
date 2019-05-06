@@ -39,8 +39,6 @@ var df = new DateFormat("yyyyMM");
 
 var PROFILE_SR = {
 	c: "sr",
-	nd: 51,
-	fd: 321,
 	lowK: 3000,
 	highK: 10000,
 	step: 100,
@@ -49,8 +47,6 @@ var PROFILE_SR = {
 
 var PROFILE_M = {
 	c: "m",
-	nd: 37,
-	fd: 307,
 	lowK: 2000,
 	highK: 4000,
 	step: 50,
@@ -59,8 +55,6 @@ var PROFILE_M = {
 
 var PROFILE_CF = {
 	c: "cf",
-	nd: 51,
-	fd: 321,
 	lowK: 10000,
 	highK: 20000,
 	step: 200,
@@ -69,8 +63,6 @@ var PROFILE_CF = {
 
 var PROFILE_C = {
 	c: "c",
-	nd: 37,
-	fd: 307,
 	lowK: 1000,
 	highK: 3000,
 	step: 20,
@@ -79,15 +71,19 @@ var PROFILE_C = {
 
 var profile = PROFILE_SR;
 
+var md = profile.mdelay
+var nd = md+45;
+var fd = md+195
+
 var shibor = db2.load("shibor_on");
 
 var mms = generateMatureMonths("201709","201905",["01","05","09"])
-var futures = findFutureSerieWithin(db2,profile.c,mms,"close",profile.nd,profile.fd);
+var futures = findFutureSerieWithin(db2,profile.c,mms,"close",nd,fd);
 
 var strikes = generateStrikes(profile.lowK,profile.highK,profile.step);
 var options = {};
 array_(mms).foreach(function(mm){
-	merge(options,findOptionSerieWithin(db2,profile.c,mm,"c",strikes,"close",profile.nd,profile.fd));
+	merge(options,findOptionSerieWithin(db2,profile.c,mm,"c",strikes,"close",nd,fd));
 });
 
 var ivs = [];

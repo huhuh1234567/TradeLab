@@ -1,7 +1,6 @@
 
 var K = require("../k/k");
 var merge = K.merge;
-var kv$ = K.kv$;
 
 var K_ITERATOR = require("../k/k-iterator");
 var count_ = K_ITERATOR.count_;
