@@ -48,6 +48,8 @@ var fd = md+195;
 
 var n = 10;
 
+var verbose = false;
+
 var shibor = db2.load("shibor_on");
 
 var mms = generateMatureMonths("201709","201905",["01","05","09"])
@@ -61,7 +63,7 @@ object_(futures).foreach(function(kv){
 	var c = names[0];
 	var mm = names[1];
 	var dfx = dayfix(c,mm);
-	pnlss.push(deltaHedge(name,data,shibor,b76m,cp,iv,md-dfx,ld-dfx,nd-dfx,fd-dfx,cnt,th,profile.step,profile.plex,profile.fee,profile.spread));
+	pnlss.push(deltaHedge(name,data,shibor,b76m,cp,iv,md-dfx,ld-dfx,nd-dfx,fd-dfx,cnt,th,profile.step,profile.plex,profile.fee,profile.spread,verbose));
 });
 
 var sum = 0;

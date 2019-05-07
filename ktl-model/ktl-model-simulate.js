@@ -186,7 +186,7 @@
 		}
 	}
 
-	function deltaHedge(name,data,rdata,pm,cp,iv,md,ld,nd,fd,ocnt,th,step,plex,fee,sprd){
+	function deltaHedge(name,data,rdata,pm,cp,iv,md,ld,nd,fd,ocnt,th,step,plex,fee,sprd,verbose){
 
 		var rst = [];
 		
@@ -200,7 +200,7 @@
 				if(d<=nd){
 					return true;
 				}
-				var pnl = deltaHedgeOnce(name,data,rdata,pm,cp,iv,md,ld,d,ocnt,th,step,plex,fee,sprd);
+				var pnl = deltaHedgeOnce(name,data,rdata,pm,cp,iv,md,ld,d,ocnt,th,step,plex,fee,sprd,verbose);
 				if(pnl!==undefined){
 					rst.push(pnl);
 				}
@@ -255,9 +255,7 @@
 		return rst;
 	}
 
-	function realDeltaHedge(name,uls,optss,rates,pm,cp,ivlb,ivub,md,ld,nd,fd,ocnt,th,step,plex,fee,sprd){
-
-		var verbose = false;
+	function realDeltaHedge(name,uls,optss,rates,pm,cp,ivlb,ivub,md,ld,nd,fd,ocnt,th,step,plex,fee,sprd,verbose){
 
 		var rst = [];
 		
