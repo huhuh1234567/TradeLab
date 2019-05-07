@@ -3,15 +3,11 @@ var K = require("../k/k");
 var merge = K.merge;
 
 var K_ITERATOR = require("../k/k-iterator");
-var count_ = K_ITERATOR.count_;
 var array_ = K_ITERATOR.array_;
 var object_ = K_ITERATOR.object_;
 
 var K_DATE = require("../k/k-date");
 var DateFormat = K_DATE.DateFormat;
-
-var KTL = require("../ktl/ktl")
-var print = KTL.print;
 
 var KTL_DATE = require("../ktl/ktl-date");
 var date2offset = KTL_DATE.date2offset;
@@ -26,9 +22,8 @@ var findOptionSerieWithin = KTL_MODEL_DATASOURCE.findOptionSerieWithin;
 
 var Black76Model = require("../ktl-option/ktl-option-pricing-black-76").Black76Model;
 
-var KTL_STAT = require("../ktl-stat/ktl-stat");
-var percents = KTL_STAT.percents;
-var histogram = KTL_STAT.histogram;
+var KTL_APP_VOL = require("../ktl-app/ktl-app-volatility");
+var displayVolStat = KTL_APP_VOL.displayVolStat;
 
 var PROFILE = require("../ktl-app/ktl-app-profile");
 var dayfix = PROFILE.dayfix;
@@ -91,24 +86,7 @@ object_(futures).foreach(function(kv){
 	});
 });
 
-var n = 20;
-var poss = [1,5,10,15,20,25,30,35,40,45,50,55,60,65,70,75,80,85,90,95,99]
-
 array_([ivcs,ivps]).foreach(function(ivs){
 	console.error();
-	//histo
-	var histo = histogram([ivs],n);
-	var min = histo.min;
-	var max = histo.max;
-	var gap = (max-min)/n;
-	console.error("histo\t"+count_(n+1).map_(function(i){
-		return print((min+gap*i)*100.0,2)+"%";
-	}).toArray().join("\t"));
-	console.error("\t"+histo.histo.join("\t"));
-	//percents
-	var ivpcs = percents([ivs],poss);
-	console.error("p-cents\t"+poss.join("\t"));
-	console.error("\t"+array_(ivpcs).map_(function(v){
-		return print(v*100.0,2)+"%";
-	}).toArray().join("\t"));
+	displayVolStat([ivs],20,[1,5,10,15,20,25,30,35,40,45,50,55,60,65,70,75,80,85,90,95,99],"\t");
 });
