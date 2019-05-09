@@ -22,8 +22,9 @@ var findOptionSerieWithin = KTL_MODEL_DATASOURCE.findOptionSerieWithin;
 
 var Black76Model = require("../ktl-option/ktl-option-pricing-black-76").Black76Model;
 
-var KTL_APP_VOL = require("../ktl-app/ktl-app-volatility");
-var displayVolStat = KTL_APP_VOL.displayVolStat;
+var KTL_APP_DISPLAY = require("../ktl-app/ktl-app-display");
+var displayBasic = KTL_APP_DISPLAY.displayBasic;
+var displayStat = KTL_APP_DISPLAY.displayStat;
 
 var PROFILE = require("../ktl-app/ktl-app-profile");
 var dayfix = PROFILE.dayfix;
@@ -34,7 +35,7 @@ var db2 = new Database("./test/db","option");
 
 var df = new DateFormat("yyyyMM");
 
-var profile = PROFILE.C;
+var profile = PROFILE.M;
 
 var md = profile.mdelay
 var nd = md+45;
@@ -42,13 +43,15 @@ var fd = md+195
 
 var shibor = db2.load("shibor_on");
 
-var mms = generateMatureMonths("201905","201905",["01","05","09"])
+var mms = generateMatureMonths("201709","201905",["01","05","09"])
 var futures = findFutureSerieWithin(db2,profile.c,mms,"close",nd-5,fd+15);
 
 var strikes = generateStrikes(profile.lowK,profile.highK,profile.step);
 
 var ivcs = [];
 var ivps = [];
+var ivcpas = [];
+var ivcpds = [];
 object_(futures).foreach(function(kv){
 	var name = kv.$;
 	var data = kv._;
@@ -67,6 +70,7 @@ object_(futures).foreach(function(kv){
 				var atm = Math.round(kv._/profile.step)*profile.step;
 				var optcs = options[[c,mm,"c",""+atm,"close"].join("_")];
 				var optps = options[[c,mm,"p",""+atm,"close"].join("_")];
+				var ivcp = [];
 				array_([[1,optcs,ivcs],[-1,optps,ivps]]).foreach(function(param){
 					var cp = param[0];
 					var opts = param[1];
@@ -77,16 +81,22 @@ object_(futures).foreach(function(kv){
 							var iv = b76m.iv(oprice,price,atm,rate,day,mday,cp);
 							if(!isNaN(iv)&&iv>0){
 								ivs.push(iv);
+								ivcp.push(iv);
 							}
 						}
 					}
 				});
+				if(ivcp.length==2){
+					ivcpas.push(0.5*(ivcp[0]+ivcp[1]));
+					ivcpds.push(ivcp[0]-ivcp[1]);
+				}
 			}
 		}
 	});
 });
 
-array_([ivcs,ivps]).foreach(function(ivs){
+array_([ivcs,ivps,ivcpas,ivcpds]).foreach(function(vs){
 	console.error();
-	displayVolStat([ivs],20,[1,5,10,15,20,25,30,35,40,45,50,55,60,65,70,75,80,85,90,95,99],"\t");
+	displayBasic([vs],100.0,2,"","%");
+	displayStat([vs],20,[1,5,10,15,20,25,30,35,40,45,50,55,60,65,70,75,80,85,90,95,99],100.0,2,"","%","\t");
 });

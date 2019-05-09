@@ -12,8 +12,9 @@ var KTL_MODEL_DATASOURCE = require("../ktl-model/ktl-model-datasource");
 var generateMatureMonths = KTL_MODEL_DATASOURCE.generateMatureMonths;
 var findFutureSerieWithin = KTL_MODEL_DATASOURCE.findFutureSerieWithin;
 
-var KTL_APP_VOL = require("../ktl-app/ktl-app-volatility");
-var displayVolStat = KTL_APP_VOL.displayVolStat;
+var KTL_APP_DISPLAY = require("../ktl-app/ktl-app-display");
+var displayBasic = KTL_APP_DISPLAY.displayBasic;
+var displayStat = KTL_APP_DISPLAY.displayStat;
 
 var KTL_STAT_VOL = require("../ktl-stat/ktl-stat-vol");
 var hvc2c = KTL_STAT_VOL.hvc2c;
@@ -22,7 +23,7 @@ var PROFILE = require("../ktl-app/ktl-app-profile");
 
 var db2 = new Database("./test/db","option");
 
-var profile = PROFILE.C;
+var profile = PROFILE.M;
 
 var md = profile.mdelay
 var nd = md+45;
@@ -40,5 +41,6 @@ array_([22,44,66,88]).foreach(function(term){
 	});
 	console.error();
 	console.error("term="+term);
-	displayVolStat(hvss,20,[1,5,10,15,20,25,30,35,40,45,50,55,60,65,70,75,80,85,90,95,99],"\t");
+	displayBasic(hvss,100.0,2,"","%");
+	displayStat(hvss,20,[1,5,10,15,20,25,30,35,40,45,50,55,60,65,70,75,80,85,90,95,99],100.0,2,"","%","\t");
 });

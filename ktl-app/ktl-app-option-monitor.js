@@ -60,7 +60,7 @@ var PROFILE_C = merge(PROFILE.C,{
 	queryUnderlying: queryDceDelayFuture
 });
 
-var profile = PROFILE_M;
+var profile = PROFILE_SR;
 
 var c = profile.c;
 var mm = "201909";
@@ -70,7 +70,7 @@ var srate = 0.05;
 var spread = profile.step*srate;
 var queryOption = profile.queryOption;
 var queryUnderlying = profile.queryUnderlying;
-var ir = 0.026;
+var ir = 0.015;
 
 var day = date2offset(new Date());
 var mday = date2offset(df.parse(mm))-profile.mdelay+dayfix(c,mm);

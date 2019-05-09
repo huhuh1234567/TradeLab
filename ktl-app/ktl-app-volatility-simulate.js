@@ -17,8 +17,8 @@ var Black76Model = require("../ktl-option/ktl-option-pricing-black-76").Black76M
 var KTL_MODEL_SIMULATE = require("../ktl-model/ktl-model-simulate");
 var deltaHedgeVolatility = KTL_MODEL_SIMULATE.deltaHedgeVolatility;
 
-var KTL_APP_VOL = require("../ktl-app/ktl-app-volatility");
-var displayVolStat = KTL_APP_VOL.displayVolStat;
+var KTL_APP_DISPLAY = require("../ktl-app/ktl-app-display");
+var displayStat = KTL_APP_DISPLAY.displayStat;
 
 var PROFILE = require("../ktl-app/ktl-app-profile");
 
@@ -57,5 +57,5 @@ array_([30,60,90,120]).foreach(function(dur){
 	});
 	console.error();
 	console.error("dur="+dur);
-	displayVolStat(ivss,20,[1,5,10,15,20,25,30,35,40,45,50,55,60,65,70,75,80,85,90,95,99],"\t");
+	displayStat(ivss,20,[1,5,10,15,20,25,30,35,40,45,50,55,60,65,70,75,80,85,90,95,99],100.0,2,"","%","\t");
 });

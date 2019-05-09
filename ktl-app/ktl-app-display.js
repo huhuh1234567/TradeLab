@@ -14,26 +14,50 @@
 	var percents = KTL_STAT.percents;
 	var histogram = KTL_STAT.histogram;
 
-	function displayVolStat(vss,n,poss,sep){
+
+	function print2(v,plex,nop,prefix,suffix){
+		return prefix+print(v*plex,nop)+suffix;
+	}
+
+
+	function displayBasic(vss,plex,nop,prefix,suffix){
+		var count = 0;
+		var sum = 0;
+		var sum2 = 0;
+		array_(vss).foreach(function(vs){
+			array_(vs).foreach(function(v){
+				if(!isNaN(v)){
+					count++;
+					sum += v;
+					sum2 += v*v;
+				}
+			});
+		});
+		console.error("avg="+print2(sum/count,plex,nop,prefix,suffix));
+		console.error("sd="+print2(Math.sqrt((sum2-sum*sum/count)/(count-1)),plex,nop,prefix,suffix));
+	}
+
+	function displayStat(vss,n,poss,plex,nop,prefix,suffix,sep){
 		//histo
 		var histo = histogram(vss,n);
 		var min = histo.min;
 		var max = histo.max;
 		var gap = (max-min)/n;
 		console.error("histo"+sep+count_(n+1).map_(function(i){
-			return print((min+gap*i)*100.0,2)+"%";
+			return print2((min+gap*i),plex,nop,prefix,suffix);
 		}).toArray().join(sep));
 		console.error(sep+histo.histo.join(sep));
 		//percents
 		var ivpcs = percents(vss,poss);
 		console.error("p-cents"+sep+poss.join(sep));
 		console.error(sep+array_(ivpcs).map_(function(v){
-			return print(v*100.0,2)+"%";
+			return print2(v,plex,nop,prefix,suffix);
 		}).toArray().join(sep));
 	}
 
 	merge(exports,{
-		displayVolStat: displayVolStat
+		displayBasic: displayBasic,
+		displayStat: displayStat
 	});
 
 })();
