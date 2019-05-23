@@ -56,7 +56,8 @@ var cp = 0;
 
 var cnt = 10;
 
-var th = 1.0;
+var th = 2.5;
+var adj = 0.4;
 
 var md = profile.mdelay
 var ld = md+45;
@@ -93,7 +94,7 @@ array_(ivlbs).foreach(function(ivlb){
 			var mm = names[1];
 			var dfx = dayfix(c,mm);
 			var options = findOptionSerieWithin(db2,c,mm,"cp",strikes,"close",md-dfx,fd-dfx);
-			var trades = realDeltaHedge(name,data,options,shibor,b76m,cp,ivlb,ivub,md-dfx,ld-dfx,nd-dfx,fd-dfx,cnt,th,profile.step,profile.plex,profile.fee,profile.spread);
+			var trades = realDeltaHedge(name,data,options,shibor,b76m,cp,ivlb,ivub,md-dfx,ld-dfx,nd-dfx,fd-dfx,cnt,th,adj,profile.step,profile.plex,profile.fee,profile.spread);
 			array_(trades).foreach(function(trade){
 				var pnl = trade[2];
 				sum += pnl;

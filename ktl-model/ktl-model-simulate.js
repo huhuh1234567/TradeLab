@@ -77,17 +77,20 @@
 		}
 	}
 
-	function calculateHedgeCountByFloor(delta,th){
+	function calculateHedgeCountByFloor(delta,th,adj){
 		var dsign = Math.sign(delta);
 		var dval = dsign*delta;
 		if(dval>th){
-			return -dsign*Math.max(1,(dval>>0));
+			return -dsign*Math.max(1,((dval*adj)>>0));
 		}
 	}
 
-	function calculateHedgeCountByRound(delta,th,ulcnt,ulcntlb,ulcntub){
+	function calculateHedgeCountByRound(delta,th,adj,ulcnt,ulcntlb,ulcntub){
 		if(dval>th){
-			var ulhc = -Math.round(delta);
+			var ulhc = -Math.round(delta*adj);
+			if(ulhc<1&&ulhc>-1){
+				ulhc = -Math.round(delta);
+			}
 			return ulhc+ulcnt<ulcntlb?ulcntlb-ulcnt:ulhc+ulcnt>ulcntub?ulcntub-ulcnt:ulhc;
 		}
 	}
@@ -150,7 +153,7 @@
 		return pnl;
 	}
 
-	function deltaHedgeOnce(name,data,rdata,pm,cp,iv,md,ld,d0,ocnt,th,step,plex,fee,sprd,verbose){
+	function deltaHedgeOnce(name,data,rdata,pm,cp,iv,md,ld,d0,ocnt,th,adj,step,plex,fee,sprd,verbose){
 		
 		var vs = name.split("_");
 		var mm = vs[1];
@@ -178,7 +181,7 @@
 					if(!Number.isNaN(rate)){
 						var option = calculateOptionByImplVol(pm,price,strike,rate,iv,day,mday,cp);
 						if(option!==undefined){
-							return calculateHedgeCountByFloor(ocnt*option.delta+ulcnt,th);
+							return calculateHedgeCountByFloor(ocnt*option.delta+ulcnt,th,adj);
 						}
 					}
 				},ocnt,plex,fee,sprd,verbose);
@@ -186,7 +189,7 @@
 		}
 	}
 
-	function deltaHedge(name,data,rdata,pm,cp,iv,md,ld,nd,fd,ocnt,th,step,plex,fee,sprd,verbose){
+	function deltaHedge(name,data,rdata,pm,cp,iv,md,ld,nd,fd,ocnt,th,adj,step,plex,fee,sprd,verbose){
 
 		var rst = [];
 		
@@ -200,7 +203,7 @@
 				if(d<=nd){
 					return true;
 				}
-				var pnl = deltaHedgeOnce(name,data,rdata,pm,cp,iv,md,ld,d,ocnt,th,step,plex,fee,sprd,verbose);
+				var pnl = deltaHedgeOnce(name,data,rdata,pm,cp,iv,md,ld,d,ocnt,th,adj,step,plex,fee,sprd,verbose);
 				if(pnl!==undefined){
 					rst.push(pnl);
 				}
@@ -210,7 +213,7 @@
 		return rst;
 	}
 
-	function deltaHedgeVolatilityOnce(name,data,rdata,pm,cp,md,ld,d0,ocnt,th,step,plex,fee,sprd){
+	function deltaHedgeVolatilityOnce(name,data,rdata,pm,cp,md,ld,d0,ocnt,th,adj,step,plex,fee,sprd){
 	
 		var EPSILON = 1e-6;
 
@@ -219,7 +222,7 @@
 
 		while(maxiv-miniv>EPSILON){
 			var iv = (maxiv + miniv) * 0.5;
-			var piv = deltaHedgeOnce(name,data,rdata,pm,cp,iv,md,ld,d0,ocnt,th,step,plex,fee,sprd);
+			var piv = deltaHedgeOnce(name,data,rdata,pm,cp,iv,md,ld,d0,ocnt,th,adj,step,plex,fee,sprd);
 			if(piv>0){
 				miniv = iv;
 			}
@@ -231,7 +234,7 @@
 		return miniv;
 	}
 
-	function deltaHedgeVolatility(name,data,rdata,pm,cp,md,dur,nd,fd,ocnt,th,step,plex,fee,sprd){
+	function deltaHedgeVolatility(name,data,rdata,pm,cp,md,dur,nd,fd,ocnt,th,adj,step,plex,fee,sprd){
 
 		var rst = [];
 		
@@ -245,7 +248,7 @@
 				if(d<=nd){
 					return true;
 				}
-				var vol = deltaHedgeVolatilityOnce(name,data,rdata,pm,cp,md,d-dur,d,ocnt,th,step,plex,fee,sprd);
+				var vol = deltaHedgeVolatilityOnce(name,data,rdata,pm,cp,md,d-dur,d,ocnt,th,adj,step,plex,fee,sprd);
 				if(vol>0){
 					rst.push(vol);
 				}
@@ -255,7 +258,7 @@
 		return rst;
 	}
 
-	function realDeltaHedge(name,uls,optss,rates,pm,cp,ivlb,ivub,md,ld,nd,fd,ocnt,th,step,plex,fee,sprd,verbose){
+	function realDeltaHedge(name,uls,optss,rates,pm,cp,ivlb,ivub,md,ld,nd,fd,ocnt,th,adj,step,plex,fee,sprd,verbose){
 
 		var rst = [];
 		
@@ -305,7 +308,7 @@
 								if(!Number.isNaN(rate)){
 									var option = calculateOptionByCallPutPrice(pm,price,strike,rate,optcs.find(day),optps.find(day),day,mday,cp);
 									if(option!==undefined&&option.delta!==undefined){
-										return calculateHedgeCountByFloor(ocnt*option.delta+ulcnt,th);
+										return calculateHedgeCountByFloor(ocnt*option.delta+ulcnt,th,adj);
 									}
 								}
 							},ocnt,plex,fee,sprd,verbose);

@@ -43,6 +43,7 @@ var ivub = 0.1414;
 var cnt = 10;
 
 var th = 1.0;
+var adj = 1.0;
 
 var md = profile.mdelay
 var ld = md+15;
@@ -69,7 +70,7 @@ object_(futures).foreach(function(kv){
 	var mm = names[1];
 	var dfx = dayfix(c,mm);
 	var options = findOptionSerieWithin(db2,c,mm,"cp",strikes,"close",md-dfx,fd-dfx);
-	pnlss.push(array_(realDeltaHedge(name,data,options,shibor,b76m,cp,ivlb,ivub,md-dfx,ld-dfx,nd-dfx,fd-dfx,cnt,th,profile.step,profile.plex,profile.fee,profile.spread,verbose)).map_(function(trade){
+	pnlss.push(array_(realDeltaHedge(name,data,options,shibor,b76m,cp,ivlb,ivub,md-dfx,ld-dfx,nd-dfx,fd-dfx,cnt,th,adj,profile.step,profile.plex,profile.fee,profile.spread,verbose)).map_(function(trade){
 		return trade[2];
 	}).toArray());
 });

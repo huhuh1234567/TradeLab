@@ -40,6 +40,7 @@ var iv = 0.125;
 var cnt = 20;
 
 var th = 1.0;
+var adj = 1.0;
 
 var md = profile.mdelay
 var ld = md+45;
@@ -63,7 +64,7 @@ object_(futures).foreach(function(kv){
 	var c = names[0];
 	var mm = names[1];
 	var dfx = dayfix(c,mm);
-	pnlss.push(deltaHedge(name,data,shibor,b76m,cp,iv,md-dfx,ld-dfx,nd-dfx,fd-dfx,cnt,th,profile.step,profile.plex,profile.fee,profile.spread,verbose));
+	pnlss.push(deltaHedge(name,data,shibor,b76m,cp,iv,md-dfx,ld-dfx,nd-dfx,fd-dfx,cnt,th,adj,profile.step,profile.plex,profile.fee,profile.spread,verbose));
 });
 
 var sum = 0;

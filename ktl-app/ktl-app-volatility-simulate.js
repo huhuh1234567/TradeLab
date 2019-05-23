@@ -26,7 +26,7 @@ var b76m = new Black76Model();
 
 var db2 = new Database("./test/db","option");
 
-var profile = PROFILE.C;
+var profile = PROFILE.M;
 
 var cp = 0
 
@@ -35,7 +35,8 @@ var cnt = 1000;
 var fee = 0;//profile.fee;
 var spread = 0;//profile.spread;
 
-var th = 1.0;
+var th = 1;
+var adj = 1;
 
 var md = profile.mdelay
 var lld = 45;
@@ -53,7 +54,7 @@ array_([30,60,90,120]).foreach(function(dur){
 	object_(futures).foreach(function(kv){
 		var name = kv.$;
 		var data = kv._;
-		ivss.push(deltaHedgeVolatility(name,data,shibor,b76m,cp,md,dur,nd,fd,cnt,th,profile.step,profile.plex,fee,spread));
+		ivss.push(deltaHedgeVolatility(name,data,shibor,b76m,cp,md,dur,nd,fd,cnt,th,adj,profile.step,profile.plex,fee,spread));
 	});
 	console.error();
 	console.error("dur="+dur);
